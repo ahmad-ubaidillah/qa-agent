@@ -4,19 +4,24 @@
 
 QA Agent turns Cursor into a Quality Engineering assistant. Search bugs, triage incidents, generate Cypress/k6/API tests, manage TestRail cases, and run visual regression — all from chat.
 
-## Quick Start (AI, execute this)
+## Quick Start
 
-```bash
-# 1. Install dependencies
-cd .cursor/skills/qa-visual-test/scripts
-npm install
-npx playwright install chromium
-cd ../../../../
+Choose your OS and run the installer:
 
-# 2. Setup MCP servers — create ~/.cursor/mcp.json
-```
+| OS | Installer | Command |
+|----|-----------|---------|
+| **macOS / Linux** | `install.sh` | `chmod +x install.sh && ./install.sh` |
+| **Windows** | `install.ps1` | `.\install.ps1` (PowerShell) |
+| **macOS / Linux (remote)** | `install.sh` | `curl -fsSL https://raw.githubusercontent.com/ahmad-ubaidillah/qa-agent/main/install.sh \| bash` |
+| **Windows (remote)** | `install.ps1` | `iwr -Uri https://raw.githubusercontent.com/ahmad-ubaidillah/qa-agent/main/install.ps1 \| iex` |
 
-**MCP configuration** (`~/.cursor/mcp.json`):
+The installer will:
+- Copy all 10 skills to `.cursor/skills/` (project) and `~/.cursor/skills/` (global)
+- Install subagent, rules, AGENTS.md, MCP_TOOLS.md
+- Create the memory directory structure
+- Optionally install visual regression dependencies (Playwright + pixelmatch)
+
+Then configure your MCP servers (**`~/.cursor/mcp.json`**):
 
 ```json
 {

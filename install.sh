@@ -1,21 +1,51 @@
 #!/usr/bin/env bash
 #
-# QA Agent Installer
+# QA Agent Installer — macOS & Linux
+# For Windows, use install.ps1 (PowerShell)
+#
 # Usage:
-#   git clone <repo-url> && cd qa-agent && ./install.sh
-#   # OR from remote:
-#   curl -fsSL https://raw.githubusercontent.com/<user>/qa-agent/main/install.sh | bash
+#   # Clone and install:
+#   git clone <repo-url> && cd qa-agent && chmod +x install.sh && ./install.sh
+#
+#   # Remote install (macOS/Linux):
+#   curl -fsSL https://raw.githubusercontent.com/ahmad-ubaidillah/qa-agent/main/install.sh | bash
+#
+#   # Force overwrite existing global skills:
+#   ./install.sh --force
 #
 set -euo pipefail
 
-# ─── Colors ──────────────────────────────────────────────────────────
+# ─── Args ────────────────────────────────────────────────────────────────
+FORCE=false
+for arg in "$@"; do
+  case "$arg" in
+    --force|-f) FORCE=true ;;
+  esac
+done
+
+# ─── Colors ──────────────────────────────────────────────────────────────
 RED='\033[0;31m'; GREEN='\033[0;32m'; CYAN='\033[0;36m'
 BOLD='\033[1m'; NC='\033[0m'
 info()  { echo -e "${CYAN}${BOLD}[INFO]${NC}  $*"; }
 ok()    { echo -e "${GREEN}${BOLD}[OK]${NC}    $*"; }
 err()   { echo -e "${RED}${BOLD}[ERR]${NC}   $*"; }
 
-# ─── Detect mode ─────────────────────────────────────────────────────
+# ─── OS Detection ────────────────────────────────────────────────────────
+OS="$(uname -s)"
+case "$OS" in
+  Linux*)   OS_TYPE="linux" ;;
+  Darwin*)  OS_TYPE="macos" ;;
+  CYGWIN*|MINGW*|MSYS*) 
+    err "Detected Windows shell. Please use install.ps1 (PowerShell) instead."
+    err "  Open PowerShell as Admin and run:"
+    err "    .\\install.ps1"
+    exit 1
+    ;;
+  *)        OS_TYPE="other" ;;
+esac
+info "Detected OS: $OS_TYPE"
+
+# ─── Paths ────────────────────────────────────────────────────────────────
 REPO_DIR="$(cd "$(dirname "$0")" && pwd 2>/dev/null || pwd)"
 SKILLS_SRC="$REPO_DIR/.cursor/skills"
 AGENTS_SRC="$REPO_DIR/.cursor/agents"
@@ -24,7 +54,7 @@ MEMORY_SRC="$REPO_DIR/.cursor/qa-memory"
 MCP_TOOLS_SRC="$REPO_DIR/.cursor/MCP_TOOLS.md"
 AGENTS_MD_SRC="$REPO_DIR/AGENTS.md"
 
-# ─── Detect install target ────────────────────────────────────────────
+# ─── Detect install target ────────────────────────────────────────────────
 if [ -f ".cursor/skills/qa-entry/SKILL.md" ]; then
   TARGET_DIR="$REPO_DIR"
   info "Detected project root at $TARGET_DIR (running in-place)"
@@ -33,7 +63,7 @@ else
   info "Installing into $TARGET_DIR"
 fi
 
-# ─── Create directories ───────────────────────────────────────────────
+# ─── Create directories ──────────────────────────────────────────────────
 info "Creating directory structure..."
 mkdir -p "$TARGET_DIR/.cursor/skills"
 mkdir -p "$TARGET_DIR/.cursor/agents"
@@ -44,13 +74,14 @@ mkdir -p "$TARGET_DIR/.cursor/qa-memory/corrections"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/cypress"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/k6"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/karate"
+mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/visual"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/knowledge"
 
-# ─── Global skills directory ──────────────────────────────────────────
+# ─── Global skills directory ──────────────────────────────────────────────
 GLOBAL_SKILLS_DIR="${HOME}/.cursor/skills"
 mkdir -p "$GLOBAL_SKILLS_DIR"
 
-# ─── Copy skills ──────────────────────────────────────────────────────
+# ─── Copy skills ──────────────────────────────────────────────────────────
 if [ -d "$SKILLS_SRC" ]; then
   info "Copying skills to project '$TARGET_DIR/.cursor/skills/'..."
   cp -r "$SKILLS_SRC"/* "$TARGET_DIR/.cursor/skills/"
@@ -58,10 +89,16 @@ if [ -d "$SKILLS_SRC" ]; then
 
   info "Copying skills to global '$GLOBAL_SKILLS_DIR/'..."
   for skill_dir in "$SKILLS_SRC"/*/; do
+    [ -d "$skill_dir" ] || continue
     skill_name="$(basename "$skill_dir")"
     target="$GLOBAL_SKILLS_DIR/$skill_name"
     if [ -d "$target" ]; then
-      info "  Global skill '$skill_name' exists — skipping (use --force to overwrite)"
+      if [ "$FORCE" = true ]; then
+        cp -r "$skill_dir"/* "$target/"
+        ok "  Global skill '$skill_name' updated (--force)"
+      else
+        info "  Global skill '$skill_name' exists — skipping (use --force to overwrite)"
+      fi
     else
       cp -r "$skill_dir" "$target"
       ok "  Global skill '$skill_name' installed"
@@ -72,34 +109,33 @@ else
   exit 1
 fi
 
-# ─── Copy subagent ────────────────────────────────────────────────────
+# ─── Copy subagent ────────────────────────────────────────────────────────
 if [ -f "$AGENTS_SRC/qa-agent.md" ]; then
   cp "$AGENTS_SRC/qa-agent.md" "$TARGET_DIR/.cursor/agents/qa-agent.md"
   ok "Custom subagent installed (.cursor/agents/qa-agent.md)"
 fi
 
-# ─── Copy rules ────────────────────────────────────────────────────────
+# ─── Copy rules ───────────────────────────────────────────────────────────
 if [ -f "$RULES_SRC/qa-agent-rules.mdc" ]; then
   cp "$RULES_SRC/qa-agent-rules.mdc" "$TARGET_DIR/.cursor/rules/qa-agent-rules.mdc"
   ok "Project rules installed (.cursor/rules/qa-agent-rules.mdc)"
 fi
 
-# ─── Copy AGENTS.md ────────────────────────────────────────────────────
+# ─── Copy AGENTS.md ───────────────────────────────────────────────────────
 if [ -f "$AGENTS_MD_SRC" ]; then
   cp "$AGENTS_MD_SRC" "$TARGET_DIR/AGENTS.md"
   ok "AGENTS.md installed at project root"
 fi
 
-# ─── Copy MCP_TOOLS.md ─────────────────────────────────────────────────
+# ─── Copy MCP_TOOLS.md ────────────────────────────────────────────────────
 if [ -f "$MCP_TOOLS_SRC" ]; then
   cp "$MCP_TOOLS_SRC" "$TARGET_DIR/.cursor/MCP_TOOLS.md"
   ok "MCP_TOOLS.md installed"
 fi
 
-# ─── Copy MEMORY_PROTOCOL.md (if exists) ───────────────────────────────
+# ─── Copy MEMORY_PROTOCOL.md (if exists) ──────────────────────────────────
 if [ -f "$MEMORY_SRC/MEMORY_PROTOCOL.md" ]; then
-  # Don't overwrite if target already has one (user may have modified it)
-  if [ ! -f "$TARGET_DIR/.cursor/qa-memory/MEMORY_PROTOCOL.md" ]; then
+  if [ ! -f "$TARGET_DIR/.cursor/qa-memory/MEMORY_PROTOCOL.md" ] || [ "$FORCE" = true ]; then
     cp "$MEMORY_SRC/MEMORY_PROTOCOL.md" "$TARGET_DIR/.cursor/qa-memory/MEMORY_PROTOCOL.md"
     ok "MEMORY_PROTOCOL.md installed"
   else
@@ -107,7 +143,30 @@ if [ -f "$MEMORY_SRC/MEMORY_PROTOCOL.md" ]; then
   fi
 fi
 
-# ─── Done ──────────────────────────────────────────────────────────────
+# ─── Visual test npm install (optional) ───────────────────────────────────
+VISUAL_SCRIPTS_DIR="$TARGET_DIR/.cursor/skills/qa-visual-test/scripts"
+if [ -f "$VISUAL_SCRIPTS_DIR/package.json" ]; then
+  if [ ! -d "$VISUAL_SCRIPTS_DIR/node_modules" ]; then
+    info "Visual regression dependencies found. Install now? (y/N)"
+    read -r answer
+    if [ "$answer" = "y" ] || [ "$answer" = "Y" ]; then
+      (
+        cd "$VISUAL_SCRIPTS_DIR"
+        npm install --silent
+        npx playwright install chromium --with-deps 2>/dev/null || true
+      )
+      ok "Visual regression dependencies installed"
+      info "  Run: node .cursor/skills/qa-visual-test/scripts/run.js init"
+    else
+      info "  Skip npm install. Run manually when needed:"
+      info "    cd $VISUAL_SCRIPTS_DIR && npm install && npx playwright install chromium"
+    fi
+  else
+    ok "Visual regression dependencies already installed"
+  fi
+fi
+
+# ─── Done ─────────────────────────────────────────────────────────────────
 echo ""
 echo -e "${GREEN}${BOLD}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 echo -e "${GREEN}${BOLD}  QA Agent installed successfully!       ${NC}"
@@ -116,7 +175,7 @@ echo ""
 echo -e "${BOLD}Next steps:${NC}"
 echo ""
 echo "  1. Configure MCP servers → ~/.cursor/mcp.json"
-echo "     See $(pwd)/.cursor/MCP_TOOLS.md for required servers"
+echo "     See $TARGET_DIR/.cursor/MCP_TOOLS.md for required servers"
 echo ""
 echo "  2. Paste User Rules into Cursor Settings > Rules > User Rules:"
 echo "     (Open Cursor → Cmd/Ctrl+Shift+P → 'Preferences: Open User Rules')"
