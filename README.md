@@ -84,7 +84,8 @@ After restarting Cursor, select **qa-agent** from the **agent dropdown** (top-le
 │  @qa-visual-test  ← NEW: visual regression (0 token)    │
 ├──────────────────────────────────────────────────────────┤
 │  MEMORY SYSTEM (Layer 2)                                │
-│  project-context/  search-cache/  corrections/  knowledge│
+│  ~/.qa-agent/ (global)  .cursor/qa-memory/ (project)   │
+│  search-cache, corrections, knowledge | project-context │
 ├──────────────────────────────────────────────────────────┤
 │  MCP SERVERS (Layer 1)                                  │
 │  Shortcut  TestRail  Glean  Context7  Cypress  Playwright│
@@ -95,19 +96,30 @@ After restarting Cursor, select **qa-agent** from the **agent dropdown** (top-le
 
 When a user says "follow the README" or asks for QA help, follow these instructions:
 
-### Memory Protocol — Before EVERY task
+### Memory Protocol
 
-1. Read `.cursor/qa-memory/project-context/current.md`
-2. Read `.cursor/qa-memory/corrections/<domain>.md` (if exists)
-3. Check `search-cache/shortcut.json` before calling Shortcut MCP (skip if < 24h old)
-4. Save results to `generated-tests/` after generating tests
-5. Save useful knowledge to `knowledge/` to avoid re-fetching
+Memory is split into two layers. Universal data lives globally; only project-specific data stays in `.cursor/qa-memory/`.
+
+#### Global Memory (`~/.qa-agent/`) — Shared across ALL projects
+
+| File | When to read | When to write |
+|------|-------------|---------------|
+| `search-cache.json` | Before Shortcut search | After MCP call returns |
+| `corrections.json` | Before generating tests/cases | After user correction |
+| `knowledge.json` | Before researching | After learning something reusable |
+
+#### Project Memory (`.cursor/qa-memory/`) — THIS project only
+
+| File | Purpose |
+|------|---------|
+| `project-context/current.md` | Framework, conventions, test patterns |
+| `generated-tests/` | Generated test references (cypress, k6, karate, visual) |
 
 ### Skill Routing — Match task to skill
 
 **@qa-search-tickets:** User pastes error / asks "search ticket about..."
 1. Expand their words into 3-4 search queries
-2. Check search-cache first
+2. Check `~/.qa-agent/search-cache.json` first — return cached if < 24h
 3. Call Shortcut `search_stories()` — if no results, try Glean
 4. Show: similar tickets + relevance score + ownership prediction
 
@@ -179,16 +191,18 @@ When a user says "follow the README" or asks for QA help, follow these instructi
 ## File Structure
 
 ```
+~/.qa-agent/                     ← Global memory (shared across projects)
+├── search-cache.json             ← Shortcut/Glean cache
+├── corrections.json              ← User corrections
+└── knowledge.json                ← Patterns & tips
+
 .cursor/
 ├── MCP_TOOLS.md                    ← MCP tool reference
 ├── agents/qa-agent.md              ← Cursor subagent
 ├── rules/qa-agent-rules.mdc        ← Always-active rules
-├── qa-memory/                      ← Personal learning (gitignored)
+├── qa-memory/                      ← Project-specific (gitignored)
 │   ├── project-context/current.md
-│   ├── search-cache/shortcut.json
-│   ├── corrections/
-│   ├── generated-tests/
-│   └── knowledge/
+│   └── generated-tests/
 └── skills/                         ← 10 modular skills
     ├── qa-visual-test/             ← Visual regression (NEW)
     │   ├── SKILL.md
@@ -228,18 +242,25 @@ node .cursor/skills/qa-visual-test/scripts/run.js list     # list baselines
 
 ## Memory System
 
+Two layers — universal data is global, project data stays local.
+
+### Global (`~/.qa-agent/`) — shared across ALL projects
+```
+~/.qa-agent/
+├── search-cache.json      ← Shortcut/Glean cache (TTL: 24h)
+├── corrections.json       ← User corrections (universal patterns)
+└── knowledge.json         ← Accumulated tips & patterns
+```
+
+### Project (`.cursor/qa-memory/`) — THIS project only
 ```
 .cursor/qa-memory/
-├── MEMORY_PROTOCOL.md           ← Read/write rules (AI MUST follow)
 ├── project-context/current.md   ← Framework, conventions, test patterns
-├── search-cache/shortcut.json   ← Cached Shortcut results (TTL: 24h)
-├── corrections/                 ← User corrections per domain
-├── generated-tests/             ← Generated test references
-│   ├── cypress/
-│   ├── k6/
-│   ├── karate/
-│   └── visual/
-└── knowledge/                   ← Accumulated tips (avoid re-fetching)
+└── generated-tests/             ← Generated test references
+    ├── cypress/
+    ├── k6/
+    ├── karate/
+    └── visual/
 ```
 
 ## Token Efficiency

@@ -14,13 +14,36 @@ You have access to MCP servers: Shortcut, TestRail, Glean, Context7, Cypress, Pl
 
 ## Memory Protocol
 
-ALWAYS follow this before/after every task — read/write `.cursor/qa-memory/`:
+Memory is split into two layers to keep universal data out of per-project context.
 
-1. **Before searching**: check `search-cache/shortcut.json` first — if same query exists and < 24h old, return cached result
-2. **After user correction**: save to `corrections/<domain>.md` with context, what was wrong, correction, lesson
-3. **Before generating**: read `project-context/current.md` + relevant corrections from disk
-4. **After generating**: save generated test references to `generated-tests/cypress/` or `generated-tests/k6/`
-5. **Knowledge accumulation**: save useful tips from Context7/Glean to `knowledge/` — avoid re-fetching
+### 1. Global Memory (`~/.qa-agent/`) — UNIVERSAL
+Shared across ALL projects on this machine. Never duplicated.
+
+| File | Purpose | Read Before | Write After |
+|------|---------|-------------|-------------|
+| `search-cache.json` | Cached Shortcut/Glean results | Searching tickets | MCP call returns |
+| `corrections.json` | User corrections (any domain) | Generating tests/cases | User corrects you |
+| `knowledge.json` | Useful patterns & tips | Researching anything | Learning something new |
+
+**Protocol:**
+- **Before searching tickets**: read `~/.qa-agent/search-cache.json` — if query exists and < 24h old, return cached result instead of calling MCP
+- **After user correction**: read → append → write `~/.qa-agent/corrections.json` with `{ domain, context, issue, correction, lesson, timestamp }`
+- **Before generating tests/cases**: read `~/.qa-agent/corrections.json` for matching domain + `~/.qa-agent/knowledge.json` for related patterns
+- **After learning something reusable**: append to `~/.qa-agent/knowledge.json`
+
+### 2. Project Memory (`.cursor/qa-memory/`) — THIS PROJECT ONLY
+
+| File | Purpose |
+|------|---------|
+| `project-context/current.md` | Framework, conventions, test patterns |
+| `generated-tests/cypress/` | Generated Cypress test references |
+| `generated-tests/k6/` | Generated k6 test references |
+| `generated-tests/karate/` | Generated Karate test references |
+| `generated-tests/visual/` | Generated visual test references |
+
+**Protocol:**
+- **Before generating**: read `project-context/current.md` for project-specific conventions
+- **After generating**: save test references to `generated-tests/<type>/`
 
 ## Anti-Hallucination Rules (MUST FOLLOW)
 
@@ -74,4 +97,4 @@ For each skill, read the skill's SKILL.md for exact instructions.
 
 - `.cursor/MCP_TOOLS.md` — MCP tool mapping per skill
 - `.cursor/references/README.md` — offline documentation index
-- `.cursor/qa-memory/MEMORY_PROTOCOL.md` — detailed memory protocol
+- `~/.qa-agent/` — global memory store (search-cache, corrections, knowledge)

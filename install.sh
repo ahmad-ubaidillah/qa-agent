@@ -54,8 +54,11 @@ MEMORY_SRC="$REPO_DIR/.cursor/qa-memory"
 MCP_TOOLS_SRC="$REPO_DIR/.cursor/MCP_TOOLS.md"
 AGENTS_MD_SRC="$REPO_DIR/AGENTS.md"
 
+# ─── Global store dir (~/.qa-agent/) ─────────────────────────────────────
+GLOBAL_STORE_DIR="${HOME}/.qa-agent"
+
 # ─── Detect install target ────────────────────────────────────────────────
-if [ -f ".cursor/skills/qa-entry/SKILL.md" ]; then
+if [ -f "${REPO_DIR}/.cursor/skills/qa-entry/SKILL.md" ]; then
   TARGET_DIR="$REPO_DIR"
   info "Detected project root at $TARGET_DIR (running in-place)"
 else
@@ -63,83 +66,111 @@ else
   info "Installing into $TARGET_DIR"
 fi
 
-# ─── Create directories ──────────────────────────────────────────────────
-info "Creating directory structure..."
+# ─── Create project directories ──────────────────────────────────────────
+info "Creating project directory structure..."
 mkdir -p "$TARGET_DIR/.cursor/skills"
 mkdir -p "$TARGET_DIR/.cursor/agents"
 mkdir -p "$TARGET_DIR/.cursor/rules"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/project-context"
-mkdir -p "$TARGET_DIR/.cursor/qa-memory/search-cache"
-mkdir -p "$TARGET_DIR/.cursor/qa-memory/corrections"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/cypress"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/k6"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/karate"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/visual"
-mkdir -p "$TARGET_DIR/.cursor/qa-memory/knowledge"
+
+# ─── Global memory store (~/.qa-agent/) ──────────────────────────────────
+info "Creating global memory store at $GLOBAL_STORE_DIR ..."
+mkdir -p "$GLOBAL_STORE_DIR"
+
+for file in search-cache.json corrections.json knowledge.json; do
+  if [ ! -f "$GLOBAL_STORE_DIR/$file" ]; then
+    echo '[]' > "$GLOBAL_STORE_DIR/$file"
+    ok "  Created $file"
+  else
+    info "  $file exists — skipping"
+  fi
+done
 
 # ─── Global skills directory ──────────────────────────────────────────────
 GLOBAL_SKILLS_DIR="${HOME}/.cursor/skills"
 mkdir -p "$GLOBAL_SKILLS_DIR"
 
 # ─── Copy skills ──────────────────────────────────────────────────────────
-if [ -d "$SKILLS_SRC" ]; then
-  info "Copying skills to project '$TARGET_DIR/.cursor/skills/'..."
-  cp -r "$SKILLS_SRC"/* "$TARGET_DIR/.cursor/skills/"
-  ok "Project skills installed ($(ls -d "$TARGET_DIR/.cursor/skills"/*/ 2>/dev/null | wc -l) skills)"
-
-  info "Copying skills to global '$GLOBAL_SKILLS_DIR/'..."
-  for skill_dir in "$SKILLS_SRC"/*/; do
-    [ -d "$skill_dir" ] || continue
-    skill_name="$(basename "$skill_dir")"
-    target="$GLOBAL_SKILLS_DIR/$skill_name"
-    if [ -d "$target" ]; then
-      if [ "$FORCE" = true ]; then
-        cp -r "$skill_dir"/* "$target/"
-        ok "  Global skill '$skill_name' updated (--force)"
-      else
-        info "  Global skill '$skill_name' exists — skipping (use --force to overwrite)"
-      fi
-    else
-      cp -r "$skill_dir" "$target"
-      ok "  Global skill '$skill_name' installed"
-    fi
-  done
-else
+if [ ! -d "$SKILLS_SRC" ]; then
   err "Skills directory not found at '$SKILLS_SRC'. Clone the full repo."
   exit 1
 fi
 
-# ─── Copy subagent ────────────────────────────────────────────────────────
+SKILL_COUNT="$(ls -d "$SKILLS_SRC"/*/ 2>/dev/null | wc -l)"
+if [ "$TARGET_DIR" != "$REPO_DIR" ]; then
+  info "Copying skills to project '$TARGET_DIR/.cursor/skills/'..."
+  cp -r "$SKILLS_SRC"/* "$TARGET_DIR/.cursor/skills/"
+  ok "Project skills installed ($SKILL_COUNT skills)"
+else
+  info "Running in-place — project skills already present ($SKILL_COUNT skills)"
+fi
+
+info "Copying skills to global '$GLOBAL_SKILLS_DIR/'..."
+for skill_dir in "$SKILLS_SRC"/*/; do
+  [ -d "$skill_dir" ] || continue
+  skill_name="$(basename "$skill_dir")"
+  target="$GLOBAL_SKILLS_DIR/$skill_name"
+  if [ -d "$target" ]; then
+    if [ "$FORCE" = true ]; then
+      cp -r "$skill_dir"/* "$target/"
+      ok "  Global skill '$skill_name' updated (--force)"
+    else
+      info "  Global skill '$skill_name' exists — skipping (use --force to overwrite)"
+    fi
+  else
+    cp -r "$skill_dir" "$target"
+    ok "  Global skill '$skill_name' installed"
+  fi
+done
+
+# ─── Global agents directory ──────────────────────────────────────────────
+GLOBAL_AGENTS_DIR="${HOME}/.cursor/agents"
+mkdir -p "$GLOBAL_AGENTS_DIR"
+
+# ─── Copy subagent (project + global) ─────────────────────────────────────
 if [ -f "$AGENTS_SRC/qa-agent.md" ]; then
-  cp "$AGENTS_SRC/qa-agent.md" "$TARGET_DIR/.cursor/agents/qa-agent.md"
-  ok "Custom subagent installed (.cursor/agents/qa-agent.md)"
+  if [ "$TARGET_DIR" != "$REPO_DIR" ]; then
+    cp "$AGENTS_SRC/qa-agent.md" "$TARGET_DIR/.cursor/agents/qa-agent.md"
+    ok "Custom subagent installed (.cursor/agents/qa-agent.md)"
+  fi
+
+  GLOBAL_TARGET="$GLOBAL_AGENTS_DIR/qa-agent.md"
+  if [ ! -f "$GLOBAL_TARGET" ] || [ "$FORCE" = true ]; then
+    cp "$AGENTS_SRC/qa-agent.md" "$GLOBAL_TARGET"
+    ok "Global custom agent installed (~/.cursor/agents/qa-agent.md)"
+  else
+    info "Global custom agent exists — skipping (use --force to overwrite)"
+  fi
 fi
 
 # ─── Copy rules ───────────────────────────────────────────────────────────
-if [ -f "$RULES_SRC/qa-agent-rules.mdc" ]; then
+if [ -f "$RULES_SRC/qa-agent-rules.mdc" ] && [ "$TARGET_DIR" != "$REPO_DIR" ]; then
   cp "$RULES_SRC/qa-agent-rules.mdc" "$TARGET_DIR/.cursor/rules/qa-agent-rules.mdc"
   ok "Project rules installed (.cursor/rules/qa-agent-rules.mdc)"
 fi
 
 # ─── Copy AGENTS.md ───────────────────────────────────────────────────────
-if [ -f "$AGENTS_MD_SRC" ]; then
+if [ -f "$AGENTS_MD_SRC" ] && [ "$TARGET_DIR" != "$REPO_DIR" ]; then
   cp "$AGENTS_MD_SRC" "$TARGET_DIR/AGENTS.md"
   ok "AGENTS.md installed at project root"
 fi
 
 # ─── Copy MCP_TOOLS.md ────────────────────────────────────────────────────
-if [ -f "$MCP_TOOLS_SRC" ]; then
+if [ -f "$MCP_TOOLS_SRC" ] && [ "$TARGET_DIR" != "$REPO_DIR" ]; then
   cp "$MCP_TOOLS_SRC" "$TARGET_DIR/.cursor/MCP_TOOLS.md"
   ok "MCP_TOOLS.md installed"
 fi
 
-# ─── Copy MEMORY_PROTOCOL.md (if exists) ──────────────────────────────────
-if [ -f "$MEMORY_SRC/MEMORY_PROTOCOL.md" ]; then
-  if [ ! -f "$TARGET_DIR/.cursor/qa-memory/MEMORY_PROTOCOL.md" ] || [ "$FORCE" = true ]; then
-    cp "$MEMORY_SRC/MEMORY_PROTOCOL.md" "$TARGET_DIR/.cursor/qa-memory/MEMORY_PROTOCOL.md"
-    ok "MEMORY_PROTOCOL.md installed"
-  else
-    info "MEMORY_PROTOCOL.md exists — skipping (use --force to overwrite)"
+# ─── Copy project-context/current.md (if exists) ──────────────────────────
+if [ -f "$MEMORY_SRC/project-context/current.md" ] && [ "$TARGET_DIR" != "$REPO_DIR" ]; then
+  TARGET_PC="$TARGET_DIR/.cursor/qa-memory/project-context/current.md"
+  if [ ! -f "$TARGET_PC" ]; then
+    cp "$MEMORY_SRC/project-context/current.md" "$TARGET_PC"
+    ok "project-context/current.md installed"
   fi
 fi
 
@@ -177,18 +208,12 @@ echo ""
 echo "  1. Configure MCP servers → ~/.cursor/mcp.json"
 echo "     See $TARGET_DIR/.cursor/MCP_TOOLS.md for required servers"
 echo ""
-echo "  2. Paste User Rules into Cursor Settings > Rules > User Rules:"
-echo "     (Open Cursor → Cmd/Ctrl+Shift+P → 'Preferences: Open User Rules')"
-echo "     Paste the content from the README.md 'User Rules' section"
+echo "  2. Restart Cursor"
 echo ""
-echo "  3. Restart Cursor"
+echo "  3. Select 'qa-agent' from the agent dropdown"
+echo "     (top-left of chat panel) or type @qa-agent in chat"
 echo ""
-echo "  4. Type @qa in chat to start using the QA Agent!"
-echo ""
-echo -e "${CYAN}Tip:${NC} Skills are also available globally at ~/.cursor/skills/"
-echo -e "${CYAN}     so you can use @qa-* in ANY Cursor project.${NC}"
-echo ""
-echo -e "${BOLD}Agent Selection:${NC}"
-echo "  After restarting Cursor, select 'qa-agent' from the agent dropdown"
-echo "  (top-left of chat panel) or type @qa-agent in chat."
+echo -e "${CYAN}Memory:${NC}"
+echo -e "${CYAN}  Global (shared across projects): $GLOBAL_STORE_DIR${NC}"
+echo -e "${CYAN}  Project (this project only):     .cursor/qa-memory/${NC}"
 echo ""

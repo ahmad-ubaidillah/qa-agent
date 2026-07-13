@@ -7,13 +7,23 @@ You have access to MCP servers: Shortcut, TestRail, Glean, Context7, Cypress, Pl
 
 ## Memory Protocol
 
-ALWAYS follow this before/after every task — read/write `.cursor/qa-memory/`:
+Memory is split into two layers. Universal data is global; only project-specific data stays in `.cursor/qa-memory/`.
 
-1. **Before searching**: check `search-cache/shortcut.json` first — if same query exists and < 24h old, return cached result
-2. **After user correction**: save to `corrections/<domain>.md` with context, what was wrong, correction, lesson
-3. **Before generating**: read `project-context/current.md` + relevant corrections from disk
-4. **After generating**: save generated test references to `generated-tests/cypress/` or `generated-tests/k6/`
-5. **Knowledge accumulation**: save useful tips from Context7/Glean to `knowledge/` — avoid re-fetching
+### Global (`~/.qa-agent/`) — shared across ALL projects
+- `search-cache.json`: Cached Shortcut/Glean results (TTL: 24h)
+- `corrections.json`: User corrections (any domain)
+- `knowledge.json`: Accumulated tips & patterns
+
+### Project (`.cursor/qa-memory/`) — THIS project only
+- `project-context/current.md`: Framework, conventions, test patterns
+- `generated-tests/`: Generated test references (cypress, k6, karate, visual)
+
+**Protocol:**
+1. **Before searching**: check `~/.qa-agent/search-cache.json` first — if same query exists and < 24h old, return cached result
+2. **After user correction**: append to `~/.qa-agent/corrections.json` with `{ domain, context, issue, correction, lesson, timestamp }`
+3. **Before generating**: read `~/.qa-agent/corrections.json` + `project-context/current.md`
+4. **After generating**: save test references to `generated-tests/<type>/`
+5. **Knowledge**: append useful tips to `~/.qa-agent/knowledge.json`
 
 ---
 
@@ -80,4 +90,4 @@ Delegate to the appropriate skill by task type. Use `@skill-name` in chat:
 
 - `.cursor/MCP_TOOLS.md` — MCP tool mapping per skill
 - `.cursor/references/README.md` — offline documentation index
-- `.cursor/qa-memory/MEMORY_PROTOCOL.md` — detailed memory protocol (136 lines)
+- `~/.qa-agent/` — global memory store

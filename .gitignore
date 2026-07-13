@@ -1,5 +1,8 @@
-# QA Agent memory — personal learning, jangan di-commit
+# QA Agent memory — personal learning, do not commit
 .cursor/qa-memory/
+
+# OpenCode runtime state — machine-specific, do not commit
+.omo/
 
 # Visual test baselines (auto-generated reference screenshots)
 .cursor/skills/qa-visual-test/baselines/

@@ -2,21 +2,21 @@
 .SYNOPSIS
     QA Agent Installer for Windows
 .DESCRIPTION
-    Installs QA Agent skills, subagent, rules, and memory structure into the
-    current project and global Cursor configuration.
+    Installs QA Agent skills, subagent, rules, and memory structure.
+    Creates global memory store at ~\.qa-agent\ for universal data.
 .PARAMETER Force
-    Overwrite existing files without prompting
+    Overwrite existing global skills/agents without prompting
 .EXAMPLE
     .\install.ps1
     .\install.ps1 -Force
 #>
 
+[CmdletBinding()]
 param(
     [switch]$Force
 )
 
 $ErrorActionPreference = "Stop"
-$InformationPreference = "Continue"
 
 # ─── Colors ───────────────────────────────────────────────────────────────
 function Write-Info  { Write-Host "[INFO]  $args" -ForegroundColor Cyan }
@@ -24,145 +24,196 @@ function Write-Ok    { Write-Host "[OK]    $args" -ForegroundColor Green }
 function Write-Err   { Write-Host "[ERR]   $args" -ForegroundColor Red }
 
 # ─── Paths ─────────────────────────────────────────────────────────────────
-$ScriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
-$RepoDir = Resolve-Path $ScriptDir
+$RepoDir = Split-Path -Parent $MyInvocation.MyCommand.Path
+$RepoDir = (Resolve-Path $RepoDir).Path
 
-$SkillsSrc = Join-Path $RepoDir ".cursor\skills"
-$AgentsSrc = Join-Path $RepoDir ".cursor\agents"
-$RulesSrc = Join-Path $RepoDir ".cursor\rules"
-$MemorySrc = Join-Path $RepoDir ".cursor\qa-memory"
-$McpToolsSrc = Join-Path $RepoDir ".cursor\MCP_TOOLS.md"
-$AgentsMdSrc = Join-Path $RepoDir "AGENTS.md"
+$SkillsSrc    = Join-Path $RepoDir ".cursor" "skills"
+$AgentsSrc    = Join-Path $RepoDir ".cursor" "agents"
+$RulesSrc     = Join-Path $RepoDir ".cursor" "rules"
+$MemorySrc    = Join-Path $RepoDir ".cursor" "qa-memory"
+$McpToolsSrc  = Join-Path $RepoDir ".cursor" "MCP_TOOLS.md"
+$AgentsMdSrc  = Join-Path $RepoDir "AGENTS.md"
+$ReadmeSrc    = Join-Path $RepoDir "README.md"
+
+# ─── Global store dir (~\.qa-agent\) ──────────────────────────────────────
+$GlobalStoreDir = Join-Path $env:USERPROFILE ".qa-agent"
 
 # ─── Detect target ─────────────────────────────────────────────────────────
-$TestPath = Join-Path $RepoDir ".cursor\skills\qa-entry\SKILL.md"
+$TestPath = Join-Path $RepoDir ".cursor" "skills" "qa-entry" "SKILL.md"
 if (Test-Path $TestPath) {
     $TargetDir = $RepoDir
     Write-Info "Detected project root at $TargetDir (running in-place)"
-} else {
+}
+else {
     $TargetDir = (Get-Location).Path
     Write-Info "Installing into $TargetDir"
 }
 
-# ─── Create directories ────────────────────────────────────────────────────
-Write-Info "Creating directory structure..."
-$Dirs = @(
+# ─── Create project directories ────────────────────────────────────────────
+Write-Info "Creating project directory structure..."
+@(
     ".cursor\skills",
     ".cursor\agents",
     ".cursor\rules",
     ".cursor\qa-memory\project-context",
-    ".cursor\qa-memory\search-cache",
-    ".cursor\qa-memory\corrections",
     ".cursor\qa-memory\generated-tests\cypress",
     ".cursor\qa-memory\generated-tests\k6",
     ".cursor\qa-memory\generated-tests\karate",
-    ".cursor\qa-memory\knowledge"
-)
-
-foreach ($Dir in $Dirs) {
-    $FullPath = Join-Path $TargetDir $Dir
+    ".cursor\qa-memory\generated-tests\visual"
+) | ForEach-Object {
+    $FullPath = Join-Path $TargetDir $_
     New-Item -ItemType Directory -Force -Path $FullPath | Out-Null
 }
 
+# ─── Global memory store ───────────────────────────────────────────────────
+Write-Info "Creating global memory store at $GlobalStoreDir ..."
+New-Item -ItemType Directory -Force -Path $GlobalStoreDir | Out-Null
+
+# Initialize JSON files if they don't exist
+$GlobalFiles = @{
+    "search-cache.json" = '[]'
+    "corrections.json"  = '[]'
+    "knowledge.json"    = '[]'
+}
+foreach ($file in $GlobalFiles.Keys) {
+    $path = Join-Path $GlobalStoreDir $file
+    if (-not (Test-Path $path)) {
+        Set-Content -Path $path -Value $GlobalFiles[$file] -Encoding UTF8
+        Write-Ok "  Created $file"
+    }
+    else {
+        Write-Info "  $file exists - skipping"
+    }
+}
+
 # ─── Global skills directory ───────────────────────────────────────────────
-$GlobalSkillsDir = Join-Path $env:USERPROFILE ".cursor\skills"
+$GlobalSkillsDir = Join-Path $env:USERPROFILE ".cursor" "skills"
 New-Item -ItemType Directory -Force -Path $GlobalSkillsDir | Out-Null
 
 # ─── Copy skills ───────────────────────────────────────────────────────────
-if (Test-Path $SkillsSrc) {
-    Write-Info "Copying skills to project '$TargetDir\.cursor\skills\'..."
-    Get-ChildItem "$SkillsSrc\*" -Directory | ForEach-Object {
-        $Target = Join-Path $TargetDir ".cursor\skills\$($_.Name)"
-        Copy-Item -Path $_.FullName -Destination $Target -Recurse -Force:$Force
-    }
-    $SkillCount = (Get-ChildItem "$TargetDir\.cursor\skills\" -Directory).Count
-    Write-Ok "Project skills installed ($SkillCount skills)"
-
-    Write-Info "Copying skills to global '$GlobalSkillsDir\'..."
-    Get-ChildItem "$SkillsSrc\*" -Directory | ForEach-Object {
-        $SkillName = $_.Name
-        $Target = Join-Path $GlobalSkillsDir $SkillName
-        if (Test-Path $Target) {
-            if ($Force) {
-                Copy-Item -Path $_.FullName -Destination $Target -Recurse -Force
-                Write-Ok "  Global skill '$SkillName' installed (forced)"
-            } else {
-                Write-Info "  Global skill '$SkillName' exists — skipping (use -Force to overwrite)"
-            }
-        } else {
-            Copy-Item -Path $_.FullName -Destination $Target -Recurse
-            Write-Ok "  Global skill '$SkillName' installed"
-        }
-    }
-} else {
+if (-not (Test-Path $SkillsSrc)) {
     Write-Err "Skills directory not found at '$SkillsSrc'. Clone the full repo."
     exit 1
 }
 
-# ─── Copy subagent ─────────────────────────────────────────────────────────
+$SkillCount = (Get-ChildItem "$SkillsSrc" -Directory).Count
+if ($TargetDir -ne $RepoDir) {
+    Write-Info "Copying skills to project '$TargetDir\.cursor\skills\'..."
+    Get-ChildItem "$SkillsSrc\*" -Directory | ForEach-Object {
+        $Target = Join-Path $TargetDir ".cursor" "skills" $_.Name
+        Copy-Item -Path $_.FullName -Destination $Target -Recurse -Force:$Force
+    }
+    Write-Ok "Project skills installed ($SkillCount skills)"
+}
+else {
+    Write-Info "Running in-place - project skills already present ($SkillCount skills)"
+}
+
+Write-Info "Copying skills to global '$GlobalSkillsDir\'..."
+Get-ChildItem "$SkillsSrc\*" -Directory | ForEach-Object {
+    $SkillName = $_.Name
+    $Target = Join-Path $GlobalSkillsDir $SkillName
+    if (Test-Path $Target) {
+        if ($Force) {
+            Copy-Item -Path $_.FullName -Destination $Target -Recurse -Force
+            Write-Ok "  Global skill '$SkillName' updated (forced)"
+        }
+        else {
+            Write-Info "  Global skill '$SkillName' exists - skipping (use -Force to overwrite)"
+        }
+    }
+    else {
+        Copy-Item -Path $_.FullName -Destination $Target -Recurse
+        Write-Ok "  Global skill '$SkillName' installed"
+    }
+}
+
+# ─── Global agent directory ────────────────────────────────────────────────
+$GlobalAgentsDir = Join-Path $env:USERPROFILE ".cursor" "agents"
+New-Item -ItemType Directory -Force -Path $GlobalAgentsDir | Out-Null
+
+# ─── Copy subagent (project + global) ─────────────────────────────────────
 $AgentFile = Join-Path $AgentsSrc "qa-agent.md"
 if (Test-Path $AgentFile) {
-    $Target = Join-Path $TargetDir ".cursor\agents\qa-agent.md"
-    Copy-Item -Path $AgentFile -Destination $Target -Force:$Force
-    Write-Ok "Custom subagent installed (.cursor\agents\qa-agent.md)"
+    $ProjectAgent = Join-Path $TargetDir ".cursor" "agents" "qa-agent.md"
+    if ($AgentFile -ne $ProjectAgent) {
+        Copy-Item -Path $AgentFile -Destination $ProjectAgent -Force:$Force
+        Write-Ok "Custom subagent installed (.cursor\agents\qa-agent.md)"
+    }
+    $GlobalAgent = Join-Path $GlobalAgentsDir "qa-agent.md"
+    if ((-not (Test-Path $GlobalAgent)) -or $Force) {
+        Copy-Item -Path $AgentFile -Destination $GlobalAgent -Force:$Force
+        Write-Ok "Global custom agent installed (~\.cursor\agents\qa-agent.md)"
+    }
+    else {
+        Write-Info "Global custom agent exists - skipping (use -Force to overwrite)"
+    }
 }
 
 # ─── Copy rules ────────────────────────────────────────────────────────────
 $RulesFile = Join-Path $RulesSrc "qa-agent-rules.mdc"
 if (Test-Path $RulesFile) {
-    $Target = Join-Path $TargetDir ".cursor\rules\qa-agent-rules.mdc"
-    Copy-Item -Path $RulesFile -Destination $Target -Force:$Force
-    Write-Ok "Project rules installed (.cursor\rules\qa-agent-rules.mdc)"
+    $Target = Join-Path $TargetDir ".cursor" "rules" "qa-agent-rules.mdc"
+    if ($RulesFile -ne $Target) {
+        Copy-Item -Path $RulesFile -Destination $Target -Force:$Force
+        Write-Ok "Project rules installed (.cursor\rules\qa-agent-rules.mdc)"
+    }
 }
 
 # ─── Copy AGENTS.md ────────────────────────────────────────────────────────
 if (Test-Path $AgentsMdSrc) {
     $Target = Join-Path $TargetDir "AGENTS.md"
-    Copy-Item -Path $AgentsMdSrc -Destination $Target -Force:$Force
-    Write-Ok "AGENTS.md installed at project root"
+    if ($AgentsMdSrc -ne $Target) {
+        Copy-Item -Path $AgentsMdSrc -Destination $Target -Force:$Force
+        Write-Ok "AGENTS.md installed"
+    }
 }
 
-# ─── Copy MCP_TOOLS.md ─────────────────────────────────────────────────────
+# ─── Copy README.md ────────────────────────────────────────────────────────
+if (Test-Path $ReadmeSrc) {
+    $Target = Join-Path $TargetDir "README.md"
+    if ($ReadmeSrc -ne $Target) {
+        Copy-Item -Path $ReadmeSrc -Destination $Target -Force:$Force
+        Write-Ok "README.md installed"
+    }
+}
+
+# ─── Copy MCP_TOOLS.md ────────────────────────────────────────────────────
 if (Test-Path $McpToolsSrc) {
-    $Target = Join-Path $TargetDir ".cursor\MCP_TOOLS.md"
-    Copy-Item -Path $McpToolsSrc -Destination $Target -Force:$Force
-    Write-Ok "MCP_TOOLS.md installed"
+    $Target = Join-Path $TargetDir ".cursor" "MCP_TOOLS.md"
+    if ($McpToolsSrc -ne $Target) {
+        Copy-Item -Path $McpToolsSrc -Destination $Target -Force:$Force
+        Write-Ok "MCP_TOOLS.md installed"
+    }
 }
 
-# ─── Copy MEMORY_PROTOCOL.md (if exists) ───────────────────────────────────
-$MemoryProtocol = Join-Path $MemorySrc "MEMORY_PROTOCOL.md"
-$TargetMemoryProtocol = Join-Path $TargetDir ".cursor\qa-memory\MEMORY_PROTOCOL.md"
-if (Test-Path $MemoryProtocol) {
-    if (-not (Test-Path $TargetMemoryProtocol) -or $Force) {
-        Copy-Item -Path $MemoryProtocol -Destination $TargetMemoryProtocol -Force:$Force
-        Write-Ok "MEMORY_PROTOCOL.md installed"
-    } else {
-        Write-Info "MEMORY_PROTOCOL.md exists — skipping (use -Force to overwrite)"
+# ─── Copy project-context/current.md (if exists) ──────────────────────────
+$ProjectContextSrc = Join-Path $MemorySrc "project-context" "current.md"
+if (Test-Path $ProjectContextSrc) {
+    $Target = Join-Path $TargetDir ".cursor" "qa-memory" "project-context" "current.md"
+    if (-not (Test-Path $Target)) {
+        Copy-Item -Path $ProjectContextSrc -Destination $Target -Force
+        Write-Ok "project-context/current.md installed"
     }
 }
 
 # ─── Done ──────────────────────────────────────────────────────────────────
 Write-Host ""
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Green
-Write-Host "  QA Agent installed successfully!"       -ForegroundColor Green
-Write-Host "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
+Write-Host "  QA Agent installed successfully!" -ForegroundColor Green
+Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
-Write-Host "Next steps:" -ForegroundColor Bold
+Write-Host "Next steps:"
 Write-Host ""
-Write-Host "  1. Configure MCP servers → ~\.cursor\mcp.json"
+Write-Host "  1. Configure MCP servers -> ~\.cursor\mcp.json"
 Write-Host "     See .cursor\MCP_TOOLS.md for required servers"
 Write-Host ""
-Write-Host "  2. Paste User Rules into Cursor Settings > Rules > User Rules:"
-Write-Host "     (Open Cursor → Ctrl+Shift+P → 'Preferences: Open User Rules')"
-Write-Host "     Paste the content from the README.md 'User Rules' section"
+Write-Host "  2. Restart Cursor"
 Write-Host ""
-Write-Host "  3. Restart Cursor"
+Write-Host "  3. Select 'qa-agent' from the agent dropdown"
+Write-Host "     (top-left of chat panel) or type @qa-agent"
 Write-Host ""
-Write-Host "  4. Type @qa in chat to start using the QA Agent!"
+Write-Host "Memory:" -ForegroundColor Cyan
+Write-Host "  Global (shared across projects): $GlobalStoreDir" -ForegroundColor Cyan
+Write-Host "  Project (this project only):     .cursor\qa-memory\" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "Tip: Skills are also available globally at ~\.cursor\skills\" -ForegroundColor Cyan
-Write-Host "     so you can use @qa-* in ANY Cursor project." -ForegroundColor Cyan
-Write-Host ""
-Write-Host "Agent Selection:" -ForegroundColor Bold
-Write-Host "  After restarting Cursor, select 'qa-agent' from the agent dropdown"
-Write-Host "  (top-left of chat panel) or type @qa-agent in chat."
