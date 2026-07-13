@@ -169,13 +169,13 @@ k6 run script.js  # exit 0 = pass, exit 99 = thresholds failed
 ```
 
 ## Cheatsheet
-- `check(res, { 'name': (r) => condition })` — assert condition
-- `group('name', () => { ... })` — group requests in report
-- `sleep(1)` — think time between iterations
-- `__VU` — current VU number (1-indexed)
-- `__ITER` — current iteration number
-- `__ENV.VAR` — environment variable
-- `open('file.json')` — read file at init
-- `JSON.parse(str)` — parse JSON
-- `JSON.stringify(obj)` — serialize JSON
-- `${}` — template literals
+- `check(res, { 'name': (r) => condition })` - assert condition
+- `group('name', () => { ... })` - group requests in report
+- `sleep(1)` - think time between iterations
+- `__VU` - current VU number (1-indexed)
+- `__ITER` - current iteration number
+- `__ENV.VAR` - environment variable
+- `open('file.json')` - read file at init
+- `JSON.parse(str)` - parse JSON
+- `JSON.stringify(obj)` - serialize JSON
+- `${}` - template literals

@@ -8,7 +8,7 @@ description: Search Shortcut tickets using natural language with intelligent que
 ## Interactive Flow
 
 ### Step 1: Understand Input
-Accept user input — can be:
+Accept user input - can be:
 - **Natural language**: "bug quote generation", "pricing workbook issue"
 - **Error message**: "NullPointerException", "500 Internal Server Error", stack trace
 - **Helix ticket**: title, description, full page text
@@ -22,7 +22,7 @@ Ask the user (if unclear):
 4. **Depth**: "Brief results (top 5) or detailed (all matches)?"
 
 ### Step 3: Check Memory Cache
-MANDATORY: Check cache via `node ~/.qa-agent/lib/store.js cache get <hash>` — hash from query string.
+MANDATORY: Check cache via `node ~/.qa-agent/lib/store.js cache get <hash>` - hash from query string.
 - If returns non-null and < 24 hours → return cached result + notify user
 - If not found or > 24 hours → proceed
 
@@ -58,18 +58,19 @@ Found 8 tickets (0.3s)
 ```
 
 ### Step 7: User Loop
-Ask: "APPROVE (save cache and return), NARROW (filter further), or EXPAND (re-search with different query)?"
-- **APPROVE** → save to cache + return final
-- **NARROW** → ask for additional filters → re-search
-- **EXPAND** → ask for new query → re-search from Step 4
+Ask user (type number or custom):
+1. APPROVE - save to cache + return final
+2. NARROW - filter further (ask for additional filters -> re-search)
+3. EXPAND - re-search with different query -> ask for new query -> re-search from Step 4
+or type your own answer
 
 ### Step 8: Save to Memory
 - Cache results: `node ~/.qa-agent/lib/store.js cache set <hash> "<query>" '<results>'`
 - If user narrows/expands → save to decision memory: `node ~/.qa-agent/lib/store.js cor add "search" "<context>" "<issue>" "<pattern>" "<lesson>" "1|-1"`
 
 ## MCP Tools
-- **Shortcut**: `search_stories(query)` — main search
-- **Glean**: `search(query)` — if additional business context is needed
+- **Shortcut**: `search_stories(query)` - main search
+- **Glean**: `search(query)` - if additional business context is needed
 
 ## References
 - Search strategy detail: `reference/search-strategy.md`

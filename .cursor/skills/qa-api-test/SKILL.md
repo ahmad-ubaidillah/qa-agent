@@ -14,9 +14,9 @@ Ask the user:
    - OpenAPI → ask for file path or URL
    - Endpoint → ask for details
 2. **Coverage**: "What test coverage?"
-   - **Happy path only** — 200/201 responses
-   - **Happy + Error** — success + 4xx/5xx
-   - **All** — happy + error + schema validation + edge cases
+   - **Happy path only** - 200/201 responses
+   - **Happy + Error** - success + 4xx/5xx
+   - **All** - happy + error + schema validation + edge cases
 3. **Method**: "HTTP method? (GET, POST, PUT, DELETE, PATCH)"
 4. **Environment**: "Base URL environment? (e.g. staging, production)"
 5. **Auth**: "Is there authentication? (Bearer token, Basic auth, API key, or none)"
@@ -24,14 +24,14 @@ Ask the user:
 ### Step 2: Understand API
 - Read the story/AC to understand the business logic
 - Check `.cursor/qa-memory/project-context/current.md` for base URL and auth patterns
-- Check decision memory: `node ~/.qa-agent/lib/store.js cor list "api-test" "1"` — apply proven patterns
-- Also check: `node ~/.qa-agent/lib/store.js cor list "api-test" "-10"` — avoid past mistakes (score < 0)
+- Check decision memory: `node ~/.qa-agent/lib/store.js cor list "api-test" "1"` - apply proven patterns
+- Also check: `node ~/.qa-agent/lib/store.js cor list "api-test" "-10"` - avoid past mistakes (score < 0)
 - If OpenAPI spec is available → read to get request/response schema
 
 ### Step 3: Research (if needed)
 - Context7: `resolve-library-id("karate", "Karate")` + `query-docs` for latest syntax
 - Glean: internal API docs / Confluence
-- `.cursor/references/karate-testing.md` — offline quick reference
+- `.cursor/references/karate-testing.md` - offline quick reference
 
 ### Step 3b: Climb Decision Ladder
 Call the decision ladder from `@qa-token-saver`:
@@ -83,7 +83,7 @@ Edge:
 - Special characters in input
 - Concurrent requests (if relevant)
 
-### Step 5b: Reflexion — Self-Review Before Preview
+### Step 5b: Reflexion - Self-Review Before Preview
 BEFORE showing to the user, review the generated output:
 1. **Correctness**: Are endpoint, method, and payload correct?
 2. **Minimality**: Can Scenario Outline save lines?
@@ -101,10 +101,11 @@ Feature: ...
     ...
 ```
 
-Ask: "APPROVE, EDIT, or REJECT?"
-- **APPROVE** → save file + notify path
-- **EDIT** → ask for correction → apply → preview again
-- **REJECT** → save rejection reason to memory
+Ask user (type number or custom):
+1. APPROVE - save file + notify path
+2. EDIT - ask for correction -> apply -> preview again
+3. REJECT - save rejection reason to memory
+or type your own answer
 
 ### Step 7: Auto-Run (Optional)
 Ask the user: "Would you like to run it now?"
@@ -122,12 +123,12 @@ Ask the user: "Would you like to run it now?"
 - Update `.cursor/qa-memory/project-context/current.md` if new endpoint info
 
 ## MCP Tools
-- **Shortcut**: `get_story()` — read context
+- **Shortcut**: `get_story()` - read context
 - **Glean**: internal API docs
 - **Context7**: Karate framework docs
-- (No direct Karate MCP — run via terminal)
+- (No direct Karate MCP - run via terminal)
 
 ## References
-- `.cursor/references/karate-testing.md` — Karate syntax reference
-- `.cursor/references/git-workflow.md` — branching for PR
+- `.cursor/references/karate-testing.md` - Karate syntax reference
+- `.cursor/references/git-workflow.md` - branching for PR
 - `~/.qa-agent/`

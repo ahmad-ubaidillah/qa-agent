@@ -255,7 +255,7 @@ The report includes:
     {
       "name": "settings",
       "status": "new",
-      "note": "No prior baseline — created"
+      "note": "No prior baseline - created"
     },
     {
       "name": "profile",
@@ -274,7 +274,7 @@ The report includes:
 |--------|---------|-----------|
 | `pass` | Matches baseline within threshold | Log + skip (~10 tokens) |
 | `fail` | Differs beyond threshold | Report % + HTML report path (~200 tokens) |
-| `new` | No baseline existed — created | Inform user (~20 tokens) |
+| `new` | No baseline existed - created | Inform user (~20 tokens) |
 | `updated` | Baseline overwritten | Confirm intent (~20 tokens) |
 | `error` | Page load or comparison error | Show error message (~100 tokens) |
 
@@ -287,7 +287,7 @@ The report includes:
 # Visual test npm dependencies
 .cursor/skills/qa-visual-test/scripts/node_modules/
 
-# Diff artifacts (generated on failure — ephemeral)
+# Diff artifacts (generated on failure - ephemeral)
 # /tmp/qa-visual-diff/  (already in /tmp, no .gitignore needed)
 ```
 

@@ -45,6 +45,6 @@ Qando Defect Triage Team
 
 Generated automatically when evidence is insufficient (confidence < 70 or missing critical fields).
 
-**When to use:** Step 25 — Evidence Quality Score is Poor/Moderate or key information (environment, repro steps, screenshots) is missing.
+**When to use:** Step 25 - Evidence Quality Score is Poor/Moderate or key information (environment, repro steps, screenshots) is missing.
 
 *Content is dynamically generated based on specific gaps identified during Missing Information Analysis (Step 2).*

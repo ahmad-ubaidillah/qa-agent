@@ -9,12 +9,12 @@ search_stories(query: "bug quote generation")
 
 ### Search with filters
 Shortcut search supports natural language + filters:
-- `project:"Quote Engine"` — filter by project
-- `owner:"budi"` — filter by owner
-- `type:defect` — filter by story type
-- `state:open` — filter by workflow state
-- `label:"regression"` — filter by label
-- `deadline:2024-01-01` — filter by deadline
+- `project:"Quote Engine"` - filter by project
+- `owner:"budi"` - filter by owner
+- `type:defect` - filter by story type
+- `state:open` - filter by workflow state
+- `label:"regression"` - filter by label
+- `deadline:2024-01-01` - filter by deadline
 
 ### Advanced search examples
 ```
@@ -43,20 +43,20 @@ stories-get-current
 ```
 
 Available fields:
-- `id` — story number
-- `name` — title
-- `description` — full description (Markdown)
-- `story_type` — defect, story, chore, etc.
-- `current_state` — open, closed, etc.
-- `owner_ids` — array of owner IDs
-- `project_id` — project reference
-- `labels` — array of labels
-- `deadline` — due date
-- `created_at`, `updated_at` — timestamps
-- `requested_by_id` — creator
-- `external_tickets` — linked Helix/other tickets
-- `tasks` — checklist items
-- `comments` — discussion (limit 10)
+- `id` - story number
+- `name` - title
+- `description` - full description (Markdown)
+- `story_type` - defect, story, chore, etc.
+- `current_state` - open, closed, etc.
+- `owner_ids` - array of owner IDs
+- `project_id` - project reference
+- `labels` - array of labels
+- `deadline` - due date
+- `created_at`, `updated_at` - timestamps
+- `requested_by_id` - creator
+- `external_tickets` - linked Helix/other tickets
+- `tasks` - checklist items
+- `comments` - discussion (limit 10)
 
 ## Create Story (only after APPROVAL)
 ```
@@ -81,7 +81,7 @@ update_story(
 ```
 
 ## API Tips
-- `search_stories` returns max 25 results — narrow query if too broad
+- `search_stories` returns max 25 results - narrow query if too broad
 - Use query expansion: exact → semantic → feature → workflow → symptom
 - Cache results via `node ~/.qa-agent/lib/store.js cache set <hash> "<query>" '<results>'` (TTL 24h)
 - Never create/update stories without APPROVAL

@@ -238,7 +238,7 @@ mvn test -Dkarate.options="--tags @regression --tags ~@slow"
 
 ## Hooks
 ```javascript
-// Karate-config.js — runs before every feature
+// Karate-config.js - runs before every feature
 function fn() {
   var config = {
     baseUrl: 'https://api.example.com/v1',
@@ -249,7 +249,7 @@ function fn() {
 ```
 
 ```javascript
-// karate-config-{env}.js — per environment
+// karate-config-{env}.js - per environment
 // karate-config-staging.js
 function fn() {
   return { baseUrl: 'https://staging.example.com/v1' };

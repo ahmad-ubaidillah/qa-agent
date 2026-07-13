@@ -1,4 +1,4 @@
-# MCP Tool Map — QA Agent
+# MCP Tool Map - QA Agent
 
 Quick reference: which MCP server for which task.
 

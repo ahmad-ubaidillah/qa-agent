@@ -63,9 +63,9 @@ Save this graph as part of the map.
 
 ### Step 5: Rank Files by Importance
 Priority (like Aider's PageRank):
-1. **High** — Config files, base page object, main step registry, feature files with @daily tags
-2. **Medium** — Page objects, step definitions, test data
-3. **Low** — Helper utilities, rarely-changed files
+1. **High** - Config files, base page object, main step registry, feature files with @daily tags
+2. **Medium** - Page objects, step definitions, test data
+3. **Low** - Helper utilities, rarely-changed files
 
 ### Step 6: Generate Compact Map
 Output format (token-efficient, like Aider):
@@ -103,8 +103,8 @@ project/
 - Cache valid for 7 days (if no changes detected)
 
 ## MCP Tools
-- `glob`, `grep`, `read` — for file scanning
-- Git: `git log --oneline -5` — recent changes context
+- `glob`, `grep`, `read` - for file scanning
+- Git: `git log --oneline -5` - recent changes context
 
 ## References
 - Aider's repo map: https://aider.chat/docs/repomap.html

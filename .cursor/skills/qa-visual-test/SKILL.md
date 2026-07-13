@@ -7,11 +7,11 @@ description: Visual regression testing with token-efficient architecture. Takes 
 
 ## Principles
 
-- **Comparison = math, not AI.** Pixelmatch runs in Node.js — zero tokens for screenshot comparison.
-- **Text-only report to AI.** JSON output with pass/fail/diffPercent — no images in conversation.
-- **Diff image loaded ONLY on failure** via `look_at` — one small image, one time.
+- **Comparison = math, not AI.** Pixelmatch runs in Node.js - zero tokens for screenshot comparison.
+- **Text-only report to AI.** JSON output with pass/fail/diffPercent - no images in conversation.
+- **Diff image loaded ONLY on failure** via `look_at` - one small image, one time.
 - **Batch mode default.** All pages tested in a single script run → one summary report.
-- **HTML report on failure.** Self-contained file with baseline/actual/diff side-by-side — AI never needs to load screenshots manually.
+- **HTML report on failure.** Self-contained file with baseline/actual/diff side-by-side - AI never needs to load screenshots manually.
 
 ## Interactive Flow
 
@@ -69,7 +69,7 @@ node .cursor/skills/qa-visual-test/scripts/run.js
 
 Or with CLI args (no config file):
 ```bash
-# First run — create baselines
+# First run - create baselines
 node .cursor/skills/qa-visual-test/scripts/run.js \
   --url https://staging.example.com \
   --pages login,dashboard,settings \
@@ -80,7 +80,7 @@ node .cursor/skills/qa-visual-test/scripts/run.js \
   --url https://staging.example.com \
   --pages login,dashboard,settings
 
-# Git-aware — only test changed pages
+# Git-aware - only test changed pages
 node .cursor/skills/qa-visual-test/scripts/run.js --git-diff --url ... --pages login,dashboard
 
 # List existing baselines
@@ -104,7 +104,7 @@ The script outputs JSON to stdout:
 📄 HTML report: /tmp/qa-visual-report/visual-report-xxx.html (94.5 KB)
 ```
 
-HTML report shows baseline | actual | diff side-by-side — **no need for AI to load images**.
+HTML report shows baseline | actual | diff side-by-side - **no need for AI to load images**.
 
 **Report interpretation:**
 
@@ -112,17 +112,17 @@ HTML report shows baseline | actual | diff side-by-side — **no need for AI to 
 |--------|---------|-----------|
 | `pass` | No visual diff detected | ~10 tokens |
 | `fail` | Visual diff > threshold | ~200 tokens (mention % + HTML report path) |
-| `new` | No baseline existed — created one | ~20 tokens |
+| `new` | No baseline existed - created one | ~20 tokens |
 | `error` | Page load or comparison error | ~100 tokens |
 
 ### Step 6: Analyze Failures (only if `verdict: "FAIL"`)
 For each failed result:
-1. **Tell the user the HTML report path** — they can open it directly (no AI needed)
+1. **Tell the user the HTML report path** - they can open it directly (no AI needed)
 2. **Only if the user asks "what's different?"** → use `look_at` on the diff image
 3. Identify the culprit and report
 
 > DO NOT load full screenshots into conversation. Use the HTML report or diff image.
-> On PASS results: do not load anything — just report the summary.
+> On PASS results: do not load anything - just report the summary.
 
 ### Step 7: Baseline Management
 
@@ -141,7 +141,7 @@ For each failed result:
 
 ## Advanced Features (Zero Token Cost)
 
-These features run entirely in Node.js — no AI tokens consumed.
+These features run entirely in Node.js - no AI tokens consumed.
 
 | Feature | How It Works | Config |
 |---------|-------------|--------|
@@ -159,18 +159,18 @@ These features run entirely in Node.js — no AI tokens consumed.
 ⚠️ **No images in chat. Ever.**
 
 ```
-✅ Visual Test PASS — 3/3 passed
+✅ Visual Test PASS - 3/3 passed
 ```
 ```
-❌ Visual Test FAIL — 2/4 failed
-   • login:     0.05% diff — report: /tmp/qa-visual-report/xxx.html
+❌ Visual Test FAIL - 2/4 failed
+   • login:     0.05% diff - report: /tmp/qa-visual-report/xxx.html
    • dashboard: 0.12% diff
    ✅ settings: PASS
    ✅ profile:  PASS
 ```
 
 - Never paste full screenshots into chat.
-- Never paste full JSON report — summarize only.
+- Never paste full JSON report - summarize only.
 - On failure: mention HTML report path + diff %.
 
 ## CLI Reference

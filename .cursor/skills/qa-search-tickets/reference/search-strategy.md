@@ -8,20 +8,20 @@ Never search only exact words. Generate multiple variations:
 - Object-based variants
 - Symptom-based variants
 
-Example — Input: "Cannot add commitment after contract set to none"
+Example - Input: "Cannot add commitment after contract set to none"
 Generate: cannot add commitment, commitment blocked, commitment validation, agreement commitment issue, contract none issue, contract update commitment, commitment workflow issue, agreement workflow validation, commitment creation failure, commitment dependency issue
 
-Example — Input: "bug when generating quote"
+Example - Input: "bug when generating quote"
 Generate: generate quote, quote generation, quote calculation, quote rendering, quote creation, quote output, quote workflow, quote generation failure, quote generation issue, quote generation error
 
 ## Search Types (execute ALL)
-1. **Exact Search** — original wording
-2. **Semantic Search** — similar meaning (e.g., "cannot add commitment" ↔ "commitment creation blocked")
-3. **Feature Search** — by feature name (e.g., Agreement, Pricing, Product Catalog)
-4. **Workflow Search** — by business workflow (e.g., Quote Generation, Commitment Creation)
-5. **Object Search** — by impacted object (e.g., Quote, Contract, Commitment, Agreement)
-6. **Symptom Search** — by observed behavior (e.g., Save button disabled, Validation error, Cannot create)
-7. **Historical Resolution Search** — tickets with similar outcomes
+1. **Exact Search** - original wording
+2. **Semantic Search** - similar meaning (e.g., "cannot add commitment" ↔ "commitment creation blocked")
+3. **Feature Search** - by feature name (e.g., Agreement, Pricing, Product Catalog)
+4. **Workflow Search** - by business workflow (e.g., Quote Generation, Commitment Creation)
+5. **Object Search** - by impacted object (e.g., Quote, Contract, Commitment, Agreement)
+6. **Symptom Search** - by observed behavior (e.g., Save button disabled, Validation error, Cannot create)
+7. **Historical Resolution Search** - tickets with similar outcomes
 
 ## Search Scope
 - ALL work item types: Defect, Story, Chore, Task, Need Help, Investigation, Spike, Enhancement, Technical Debt, RCA, Incident
@@ -48,7 +48,7 @@ For every result, analyze: Title, Description, Labels, Workflow, Feature, Object
 - Business Intent Match: 15%
 
 Always explain WHY. Example:
-Similarity: 94% — ✅ Same Agreement feature, ✅ Same Commitment workflow, ✅ Same user action, ✅ Same symptom, ✅ Similar root cause investigation
+Similarity: 94% - ✅ Same Agreement feature, ✅ Same Commitment workflow, ✅ Same user action, ✅ Same symptom, ✅ Similar root cause investigation
 
 ## Ownership Prediction
 Predict based on: Historical ownership, Assignees, Labels, Similar tickets

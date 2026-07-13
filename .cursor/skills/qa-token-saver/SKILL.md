@@ -1,12 +1,12 @@
 ---
 name: qa-token-saver
-description: Decision ladder for saving tokens — Ponytail adaptation (DietrichGebert/ponytail) for QA context. Before generating any test, climb the ladder. Prevents over-engineering test scenarios, reuses existing patterns. Always-on for all automation skills.
+description: Decision ladder for saving tokens - Ponytail adaptation (DietrichGebert/ponytail) for QA context. Before generating any test, climb the ladder. Prevents over-engineering test scenarios, reuses existing patterns. Always-on for all automation skills.
 ---
 
 # QA Token Saver
 
 ## Philosophy
-Inspired by [Ponytail](https://github.com/DietrichGebert/ponytail) (81K★) — "The best code is the code you never wrote."
+Inspired by [Ponytail](https://github.com/DietrichGebert/ponytail) (81K★) - "The best code is the code you never wrote."
 For QA: **The best test is the test you never had to write.**
 
 This doesn't mean we are lazy about writing tests. Every test must be justified:
@@ -24,7 +24,7 @@ Ask: **"Is this test case truly necessary?"**
 - Is the acceptance criteria sufficiently covered by 1 test?
 - If the answer is "not needed" → SKIP this test
 
-> Example: "Back to Home" button on an error page — 1 test is enough, no need for 3.
+> Example: "Back to Home" button on an error page - 1 test is enough, no need for 3.
 
 ### Rung 2: Reuse Existing
 Ask: **"Does the project already have this?"**
@@ -32,7 +32,7 @@ Ask: **"Does the project already have this?"**
 - Is there an alias/POM/page object for this element?
 - Is there a helper function (login, selectQuote, etc.)?
 - Is there a test data fixture that can be used?
-- DO NOT duplicate — use what already exists
+- DO NOT duplicate - use what already exists
 
 ### Rung 3: Stdlib / Framework Covers It
 Ask: **"Are the framework built-in commands sufficient?"**
@@ -50,7 +50,7 @@ Ask: **"Can the browser/platform native handle this?"**
 
 ### Rung 5: Existing Dependency
 Ask: **"Can existing installed dependencies handle this?"**
-- Lodash, moment, faker, chance.js — already available?
+- Lodash, moment, faker, chance.js - already available?
 - Cypress plugins (cypress-map, cypress-real-events)?
 - Karate shared utils?
 - DO NOT install new dependencies if existing ones are sufficient
@@ -78,24 +78,24 @@ Ask: **"What is the minimum test that gives confidence?"**
 - Happy path only → POSITIVE is enough
 - Error handling critical → add NEGATIVE
 - High risk → then add EDGE + BOUNDARY
-- Don't add tests because "it might be useful later" — add only if justified now
+- Don't add tests because "it might be useful later" - add only if justified now
 
-### Rung 8: Reflexion — Self-Review (Post-Generation)
+### Rung 8: Reflexion - Self-Review (Post-Generation)
 AFTER generating, BEFORE previewing to the user:
 1. Review your own output: "Is this correct, minimal, and necessary?"
 2. If something can be improved → refine automatically
 3. Then show to the user
 
-> This is what makes "think once, do correctly" — we refine ourselves first, not the user finding errors and asking for repeats.
+> This is what makes "think once, do correctly" - we refine ourselves first, not the user finding errors and asking for repeats.
 
 ## Intensity Modes
 Like Ponytail, we have modes:
 
 | Mode | Meaning | When |
 |------|---------|------|
-| **Lite** | Ladder as guidance, can override | Default — safe |
+| **Lite** | Ladder as guidance, can override | Default - safe |
 | **Full** | Ladder MUST be followed, deviations require justification | When token saving is critical |
-| **Ultra** | Extreme YAGNI — don't create what wasn't asked for. "As long as it works" | When budget is extremely tight |
+| **Ultra** | Extreme YAGNI - don't create what wasn't asked for. "As long as it works" | When budget is extremely tight |
 
 Default: **Lite**
 

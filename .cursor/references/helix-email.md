@@ -1,7 +1,7 @@
 # Helix Email & Incident Templates
 
 ## Duplicate Incident Email
-Subject: Duplicate Incident — [HELIX-123] — Follow existing ticket [STORY-456]
+Subject: Duplicate Incident - [HELIX-123] - Follow existing ticket [STORY-456]
 
 Hi Team,
 
@@ -20,8 +20,8 @@ Please track progress on the existing ticket. No new ticket needed.
 Thanks,
 QA Agent
 
-## Not a Defect — User Error
-Subject: [HELIX-123] — Not a Defect — Expected Behavior
+## Not a Defect - User Error
+Subject: [HELIX-123] - Not a Defect - Expected Behavior
 
 Hi Team,
 
@@ -36,8 +36,8 @@ If you believe this assessment is incorrect, please reply with additional contex
 Thanks,
 QA Agent
 
-## Not a Defect — Configuration Issue
-Subject: [HELIX-123] — Configuration Issue — Not a System Defect
+## Not a Defect - Configuration Issue
+Subject: [HELIX-123] - Configuration Issue - Not a System Defect
 
 Hi Team,
 
@@ -52,8 +52,8 @@ No code change required.
 Thanks,
 QA Agent
 
-## Defect Confirmation — Draft Ticket
-Subject: [HELIX-123] — Confirmed Defect — New Ticket Created
+## Defect Confirmation - Draft Ticket
+Subject: [HELIX-123] - Confirmed Defect - New Ticket Created
 
 Hi Team,
 
@@ -76,8 +76,8 @@ Please triage and prioritize accordingly.
 Thanks,
 QA Agent
 
-## Need Help — Draft Need Help Ticket
-Subject: [HELIX-123] — Need Help — Assistance Required
+## Need Help - Draft Need Help Ticket
+Subject: [HELIX-123] - Need Help - Assistance Required
 
 Hi Team,
 

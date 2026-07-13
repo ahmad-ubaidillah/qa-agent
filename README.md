@@ -1,8 +1,8 @@
-# QA Agent — AI-Powered Quality Engineering Assistant
+# QA Agent - AI-Powered Quality Engineering Assistant
 
 > **Prompt for Cursor:** Read this README and execute the setup steps. Then ask me what I want to do.
 
-QA Agent turns Cursor into a Quality Engineering assistant. Search bugs, triage incidents, generate Cypress/k6/API tests, manage TestRail cases, and run visual regression — all from chat.
+QA Agent turns Cursor into a Quality Engineering assistant. Search bugs, triage incidents, generate Cypress/k6/API tests, manage TestRail cases, and run visual regression - all from chat.
 
 ## Quick Start
 
@@ -52,13 +52,13 @@ Then configure your MCP servers (**`~/.cursor/mcp.json`**):
 }
 ```
 
-> ⚠️ Do NOT commit `~/.cursor/mcp.json` — contains personal credentials.
+> ⚠️ Do NOT commit `~/.cursor/mcp.json` - contains personal credentials.
 
 > **Windows users:** Cursor AI agent has a [known bug](https://forum.cursor.com/t/ide-agent-ignores-terminal-integrated-defaultprofile-windows-always-uses-powershell-even-with-nushell-bash-configured/151859) where it ignores your default terminal profile and always uses PowerShell. To fix: **Settings → Agents → Legacy Terminal Tool: ON**. If using PowerShell 7 instead of PowerShell 5, add `pwsh` to the top of your system PATH.
 
 ### Select the Agent in Chat
 
-After restarting Cursor, select **@qa** from the **agent dropdown** (top-left of the chat panel) or type `@qa` in chat. The agent already has all the instructions built-in — just describe your task.
+After restarting Cursor, select **@qa** from the **agent dropdown** (top-left of the chat panel) or type `@qa` in chat. The agent already has all the instructions built-in - just describe your task.
 
 ## What QA Agent Can Do
 
@@ -100,15 +100,15 @@ When a user says "follow the README" or asks for QA help, follow these instructi
 
 ### Memory Protocol
 
-Memory is split into two layers. Use `~/.qa-agent/lib/store.js` (zero-dep Node.js CLI) for all global operations — compact, O(1) cache lookup, scoring-based decision memory.
+Memory is split into two layers. Use `~/.qa-agent/lib/store.js` (zero-dep Node.js CLI) for all global operations - compact, O(1) cache lookup, scoring-based decision memory.
 
-#### Global Memory (`~/.qa-agent/`) — Shared across ALL projects
+#### Global Memory (`~/.qa-agent/`) - Shared across ALL projects
 
 Storage engine:
-- `lib/store.js` — CLI for all data access
-- `search-cache.json` — cache MCP results (Map-based, short keys)
-- `corrections.json` — scoring-based decision memory (positive=good, negative=bad)
-- `knowledge.json` — patterns & tips
+- `lib/store.js` - CLI for all data access
+- `search-cache.json` - cache MCP results (Map-based, short keys)
+- `corrections.json` - scoring-based decision memory (positive=good, negative=bad)
+- `knowledge.json` - patterns & tips
 
 **Scoring system:**
 - `score: +1` = user confirmed correct; `score: -1` = user rejected
@@ -119,7 +119,7 @@ Storage engine:
 
 **Protocol:**
 
-1. **Before MCP search**: check cache first → `node ~/.qa-agent/lib/store.js cache get <hash>` — if returns non-null and <24h, use it
+1. **Before MCP search**: check cache first → `node ~/.qa-agent/lib/store.js cache get <hash>` - if returns non-null and <24h, use it
 2. **After MCP call**: save to cache → `node ~/.qa-agent/lib/store.js cache set <hash> "<query>" '<results>'`
 3. **After user correction**: save with score
    - If correction was correct: `node ~/.qa-agent/lib/store.js cor add <domain> <context> <issue> <correction> <lesson> 1`
@@ -132,19 +132,19 @@ Storage engine:
    - `node ~/.qa-agent/lib/store.js cor search <topic>` → if any result has score < 0, REJECT with explanation
 6. **After learning**: `node ~/.qa-agent/lib/store.js know add <domain> <topic> <content> '<tags>'`
 
-#### Project Memory (`.cursor/qa-memory/`) — THIS project only
+#### Project Memory (`.cursor/qa-memory/`) - THIS project only
 
 | File | Purpose |
 |------|---------|
 | `project-context/current.md` | Framework, conventions, test patterns |
 | `generated-tests/` | Generated test references (cypress, k6, karate, visual) |
 
-### Skill Routing — Match task to skill
+### Skill Routing - Match task to skill
 
 **@qa-search-tickets:** User pastes error / asks "search ticket about..."
 1. Expand their words into 3-4 search queries
-2. Check cache via `node ~/.qa-agent/lib/store.js cache get <hash>` — return cached if < 24h
-3. Call Shortcut `search_stories()` — if no results, try Glean
+2. Check cache via `node ~/.qa-agent/lib/store.js cache get <hash>` - return cached if < 24h
+3. Call Shortcut `search_stories()` - if no results, try Glean
 4. Show: similar tickets + relevance score + ownership prediction
 
 **@qa-defect-triage:** User gives Helix link / bug report
@@ -160,7 +160,7 @@ Storage engine:
 4. Use Playwright to explore page → build POM
 5. Generate: alias file + step definitions + `.feature` file
 6. Run via Cypress MCP → auto-heal if failed (max 2 attempts)
-7. Show preview → wait for APPROVE/EDIT/REJECT
+7. Show preview -> wait for user decision: 1. APPROVE, 2. EDIT, 3. REJECT, or custom
 
 **@qa-perf-test:** User says "create perf test" or gives Story ID
 1. Read Shortcut story for AC
@@ -173,13 +173,13 @@ Storage engine:
 1. Ask: coverage type (positive/negative/all)
 2. Read Shortcut story
 3. Check existing TestRail cases to avoid duplicates
-4. Generate + preview → APPROVE → save to TestRail
+4. Generate + preview -> decision: 1. APPROVE -> save to TestRail, 2. EDIT, 3. REJECT, or custom
 
 **@qa-visual-test:** User says "check UI" / "visual regression"
 1. Ask: URL + pages to test
 2. If first time: run with `--update-baselines`
 3. Run: `node .cursor/skills/qa-visual-test/scripts/run.js --url <url> --pages <names>`
-4. Parse JSON report — on failure, HTML report is auto-generated
+4. Parse JSON report - on failure, HTML report is auto-generated
 5. Never load full screenshots into chat. Use diff image only if asked.
 
 ### Safety Gates (NEVER violate)
@@ -191,9 +191,9 @@ Storage engine:
 - ALWAYS follow memory protocol before MCP calls
 - NEVER suppress types with `as any` or `@ts-ignore`
 - NEVER paste full screenshots into chat
-- NEVER load full images into conversation — visual regression uses text reports
+- NEVER load full images into conversation - visual regression uses text reports
 
-### Output Rules — Be Terse
+### Output Rules - Be Terse
 
 ```
 ✅ Generated: .cursor/skills/qa-visual-test/baselines/login.png
@@ -246,14 +246,14 @@ Storage engine:
     └── qa-entry/
 ```
 
-## Visual Regression — Zero-Token Design
+## Visual Regression - Zero-Token Design
 
 Comparison runs in Node.js (pixelmatch), not in AI context. Cost per scenario:
 
 | Scenario | AI Tokens | What Happens |
 |----------|-----------|-------------|
 | All PASS | ~10 | "✅ 3/3 passed" |
-| Has FAIL | ~30 + HTML report | "❌ 1 failed — see /tmp/qa-visual-report/xxx.html" |
+| Has FAIL | ~30 + HTML report | "❌ 1 failed - see /tmp/qa-visual-report/xxx.html" |
 | User asks "what changed?" | ~300 | `look_at` diff image once |
 | HTML report itself | **0** | Self-contained file, user opens directly |
 
@@ -266,9 +266,9 @@ node .cursor/skills/qa-visual-test/scripts/run.js list     # list baselines
 
 ## Memory System
 
-Two layers — universal data is global, project data stays local.
+Two layers - universal data is global, project data stays local.
 
-### Global (`~/.qa-agent/`) — shared across ALL projects
+### Global (`~/.qa-agent/`) - shared across ALL projects
 ```
 ~/.qa-agent/
 ├── search-cache.json      ← Shortcut/Glean cache (TTL: 24h)
@@ -276,7 +276,7 @@ Two layers — universal data is global, project data stays local.
 └── knowledge.json         ← Accumulated tips & patterns
 ```
 
-### Project (`.cursor/qa-memory/`) — THIS project only
+### Project (`.cursor/qa-memory/`) - THIS project only
 ```
 .cursor/qa-memory/
 ├── project-context/current.md   ← Framework, conventions, test patterns
@@ -291,11 +291,11 @@ Two layers — universal data is global, project data stays local.
 
 | Strategy | Saving |
 |----------|--------|
-| Modular skills — load only 1 per task | ~70% |
-| Search cache — 24h TTL, no repeat MCP calls | ~60% |
-| Reference files — detail in `reference/`, not SKILL.md | ~40% |
-| Memory protocol — read before MCP call | ~50% |
-| Visual regression — pixelmatch (0 token math) | ~99% vs AI-based comparison |
+| Modular skills - load only 1 per task | ~70% |
+| Search cache - 24h TTL, no repeat MCP calls | ~60% |
+| Reference files - detail in `reference/`, not SKILL.md | ~40% |
+| Memory protocol - read before MCP call | ~50% |
+| Visual regression - pixelmatch (0 token math) | ~99% vs AI-based comparison |
 
 **Estimated per session:** < 500 tokens for instructions (User Rules + 1 skill + relevant memory).
 

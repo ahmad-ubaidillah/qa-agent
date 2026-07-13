@@ -1,4 +1,4 @@
-# Visual Regression Architecture — Token-Efficient Design
+# Visual Regression Architecture - Token-Efficient Design
 
 ## Why Visual Regression Doesn't Eat Tokens
 
@@ -94,13 +94,13 @@ Compare with generating a Cypress test (~2,000 tokens) or k6 test (~1,500 tokens
 
 ### 2. HTML Report Replaces AI Image Analysis
 - On failure, a self-contained HTML report is generated with baseline/actual/diff side-by-side
-- The user opens it directly — **no AI tokens needed** for image viewing
+- The user opens it directly - **no AI tokens needed** for image viewing
 - AI only calls `look_at(diff.png)` IF the user explicitly asks "what changed?"
 
 ### 3. Lazy Diff Loading
 - Diff image is only generated IF comparison fails
 - AI only calls `look_at(diff.png)` IF the user asks for details
-- Single `look_at` call — not a loop
+- Single `look_at` call - not a loop
 
 ### 4. Batch Mode
 - All pages tested in a single `run.js` invocation
@@ -147,9 +147,9 @@ Script output (stdout):
 }
   ↓
 AI reports:
-  ✅ Visual Test PASS — 2/2 passed
+  ✅ Visual Test PASS - 2/2 passed
   • login:     PASS
-  • dashboard: PASS (0.0003% diff — negligible)
+  • dashboard: PASS (0.0003% diff - negligible)
 ```
 
 ## Lifecycle
@@ -160,7 +160,7 @@ AI reports:
 2. AI runs: node run.js --url ... --pages ... --update-baselines
 3. Script creates baseline PNGs in baselines/
 4. Report: all "new" status
-5. AI explains: "Baselines created for login, dashboard — ready for future comparisons"
+5. AI explains: "Baselines created for login, dashboard - ready for future comparisons"
 ```
 
 ### Normal Run (Baselines Exist)

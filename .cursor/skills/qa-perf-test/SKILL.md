@@ -14,11 +14,11 @@ Ask the user:
    - Endpoint → ask for details (method, payload, headers)
    - Flow → ask for endpoint sequence
 2. **Scenario Type**: "What test scenario?"
-   - **Load** — normal traffic (baseline)
-   - **Stress** — gradual increase until breakpoint
-   - **Spike** — sudden surge
-   - **Soak** — long duration (stamina)
-   - **Smoke** — small validation (1-2 VUs)
+   - **Load** - normal traffic (baseline)
+   - **Stress** - gradual increase until breakpoint
+   - **Spike** - sudden surge
+   - **Soak** - long duration (stamina)
+   - **Smoke** - small validation (1-2 VUs)
 3. **Workload**: "How many VUs (virtual users) and duration?"
    - Default: 10 VU, 30s for smoke
    - Ask if user wants custom values
@@ -28,13 +28,13 @@ Ask the user:
 5. **Environment**: "Base URL environment? (staging, production, or custom)"
 
 ### Step 2: Check Memory & Existing
-- Read `.cursor/qa-memory/project-context/current.md` — find base URL, auth pattern, existing k6 helpers
-- Check decision memory: `node ~/.qa-agent/lib/store.js cor list "perf-test" "1"` — apply proven patterns
-- Also check: `node ~/.qa-agent/lib/store.js cor list "perf-test" "-10"` — avoid past mistakes (score < 0)
-- Search for existing k6 files in the project — reuse helpers (getToken, getGlobal, defineSummary, thresholds, data generators)
+- Read `.cursor/qa-memory/project-context/current.md` - find base URL, auth pattern, existing k6 helpers
+- Check decision memory: `node ~/.qa-agent/lib/store.js cor list "perf-test" "1"` - apply proven patterns
+- Also check: `node ~/.qa-agent/lib/store.js cor list "perf-test" "-10"` - avoid past mistakes (score < 0)
+- Search for existing k6 files in the project - reuse helpers (getToken, getGlobal, defineSummary, thresholds, data generators)
 
 ### Step 3: Research (if needed)
-- `.cursor/references/k6-testing.md` — k6 syntax & patterns
+- `.cursor/references/k6-testing.md` - k6 syntax & patterns
 - Context7: `resolve-library-id("k6", "k6")` → `query-docs` for latest docs
 - Glean: internal API docs / Confluence
 
@@ -57,7 +57,7 @@ Call the decision ladder from `@qa-token-saver`:
 6. **One-liner**: Can it be a single scenario? Parameterized?
 7. **Minimum**: Is load test alone enough? Skip stress/spike/soak if not justified.
 
-### Step 5b: Reflexion — Self-Review Before Preview
+### Step 5b: Reflexion - Self-Review Before Preview
 BEFORE showing to the user, review the generated output:
 1. **Correctness**: Are endpoint, thresholds, and stages correct?
 2. **Minimality**: Is 1 scenario type enough? Is stress/soak really needed?
@@ -109,10 +109,11 @@ Every test must have: checks, thresholds, assertions.
 ### Step 6: Preview & User Loop
 Show the preview script + file path:
 
-Ask: "APPROVE, EDIT, or REJECT?"
-- **APPROVE** → save file
-- **EDIT** → ask for correction → apply → preview again
-- **REJECT** → save rejection: `node ~/.qa-agent/lib/store.js cor add "perf-test" "<context>" "<issue>" "<reason>" "<lesson>" "-1"`
+Ask user (type number or custom):
+1. APPROVE - save file
+2. EDIT - ask for correction -> apply -> preview again
+3. REJECT - save rejection: `node ~/.qa-agent/lib/store.js cor add "perf-test" "<context>" "<issue>" "<reason>" "<lesson>" "-1"`
+or type your own answer
 
 ### Step 8: Auto-Run (Optional)
 Ask the user: "Would you like to run it now?"
@@ -125,7 +126,7 @@ k6 run --out json=results.json path/to/test.js
 ```
 
 ### Step 9: Auto-Healing (if run fails)
-1. Read error log — identify the issue (endpoint typo, auth, threshold too strict)
+1. Read error log - identify the issue (endpoint typo, auth, threshold too strict)
 2. Fix the issue
 3. Re-run max 2x
 4. If still failing → show error + ask for guidance
@@ -136,11 +137,11 @@ k6 run --out json=results.json path/to/test.js
 - Save run results (metrics) to knowledge: `node ~/.qa-agent/lib/store.js know add "perf-test" "<topic>" "<content>" '["k6","metrics"]'`
 
 ## MCP Tools
-- **Shortcut**: `get_story()` — read story for context
+- **Shortcut**: `get_story()` - read story for context
 - **Context7**: k6 documentation (only if needed)
 - **Glean**: internal API docs / Confluence
 
 ## References
-- `.cursor/references/k6-testing.md` — k6 syntax
-- `.cursor/references/git-workflow.md` — branching for perf test PR
-- `~/.qa-agent/` — global memory store
+- `.cursor/references/k6-testing.md` - k6 syntax
+- `.cursor/references/git-workflow.md` - branching for perf test PR
+- `~/.qa-agent/` - global memory store

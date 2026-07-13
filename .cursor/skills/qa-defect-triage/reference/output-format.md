@@ -101,6 +101,6 @@ Generated if confidence < 70 or evidence is insufficient.
 
 Pending Approval
 Allowed Commands:
-- APPROVE
+1. APPROVE
 - EDIT
 - REJECT

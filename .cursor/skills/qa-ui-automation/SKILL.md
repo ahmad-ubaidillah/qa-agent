@@ -30,11 +30,11 @@ Understand: feature, workflow, acceptance criteria.
 If unclear → Context7 or `.cursor/references/` for framework documentation.
 Glean for product documentation/Confluence.
 
-### Step 6: POM Builder — Playwright Exploration
+### Step 6: POM Builder - Playwright Exploration
 Use Playwright MCP for page exploration:
-1. `browser_navigate(url)` — open the page in the requested environment
+1. `browser_navigate(url)` - open the page in the requested environment
 2. Log in with the provided user credentials
-3. `browser_get_accessibility_tree()` — get accessibility structure
+3. `browser_get_accessibility_tree()` - get accessibility structure
 4. Identify elements: form inputs, buttons, dropdowns, tables
 5. Collect element details:
    - `data-testid` (priority 1)
@@ -65,22 +65,22 @@ Call the decision ladder from `@qa-token-saver`:
 → Record decision: "YAGNI skip" / "Reuse existing" / "Generate minimal"
 
 ### Step 8: Generate
-1. **Aliases** (`.js`) — element selectors from POM builder results
-2. **Step definitions** (`.js`) — action steps
-3. **.feature file** — with `@test_id=C{number}` tag
+1. **Aliases** (`.js`) - element selectors from POM builder results
+2. **Step definitions** (`.js`) - action steps
+3. **.feature file** - with `@test_id=C{number}` tag
    - camelCase for feature file names
    - Sentence case for scenario names
 
-### Step 9b: Reflexion — Self-Review Before Preview
+### Step 9b: Reflexion - Self-Review Before Preview
 BEFORE showing to the user, review the generated output:
 1. **Correctness**: Does the test match AC/requirements? Are selectors correct?
 2. **Minimality**: Is every step necessary? Can they be combined?
 3. **Reuse**: Any missed step def / alias?
 4. **Consistency**: Does the format match project conventions? (camelCase feature, @test_id tag?)
-5. **If there is an issue → refine automatically** — no need to ask for permission first
+5. **If there is an issue → refine automatically** - no need to ask for permission first
 6. **Then show** to the user for APPROVE/EDIT/REJECT
 
-> Principle: "Think once, do correctly." Instead of the user seeing it, correcting it, us fixing it, the user correcting again — it's better to refine ourselves first before preview.
+> Principle: "Think once, do correctly." Instead of the user seeing it, correcting it, us fixing it, the user correcting again - it's better to refine ourselves first before preview.
 
 ### Step 10: Auto-Run
 Run the test via Cypress MCP:
@@ -90,7 +90,7 @@ npm run test:{suite} -- -e TAGS="@test_id=C{id}"
 
 ### Step 11: Auto-Healing
 If the test FAILED:
-1. Read the error message — identify which selector failed
+1. Read the error message - identify which selector failed
 2. Playwright MCP: re-explore the page → find alternative selectors
 3. Update alias with new selector
 4. Re-run test
@@ -98,9 +98,11 @@ If the test FAILED:
 6. If still failing → show error to user + ask for guidance
 
 ### Step 12: User Loop
-- **APPROVE** → Save to memory, update testrail-coverage.json
-- **EDIT** → Apply correction → save to decision memory: `node ~/.qa-agent/lib/store.js cor add "ui-automation" "<context>" "<issue>" "<correction>" "<lesson>" "1|-1"`
-- **REJECT** → Save rejection reason to memory
+Ask user (type number or custom):
+1. APPROVE - Save to memory, update testrail-coverage.json
+2. EDIT - Apply correction -> save to decision memory: `node ~/.qa-agent/lib/store.js cor add "ui-automation" "<context>" "<issue>" "<correction>" "<lesson>" "1|-1"`
+3. REJECT - Save rejection reason to memory
+or type your own answer
 
 ### Step 13: Save to Memory
 - Update `.cursor/qa-memory/generated-tests/cypress/` with new test reference
@@ -117,9 +119,9 @@ If the test FAILED:
 - Suite tag: `@flex_quote`, `@daily_run`
 
 ## MCP Tools
-- **TestRail**: `get_cases()`, `get_case()` — get context
-- **Playwright**: `browser_navigate()`, `browser_click()`, `browser_type()`, `browser_get_accessibility_tree()`, `browser_screenshot()` — POM builder
-- **Cypress**: `run_spec()` — auto-run + auto-heal
+- **TestRail**: `get_cases()`, `get_case()` - get context
+- **Playwright**: `browser_navigate()`, `browser_click()`, `browser_type()`, `browser_get_accessibility_tree()`, `browser_screenshot()` - POM builder
+- **Cypress**: `run_spec()` - auto-run + auto-heal
 - **Context7**: framework docs
 - **Glean**: product docs
 

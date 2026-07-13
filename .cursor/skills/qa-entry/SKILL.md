@@ -6,26 +6,26 @@ description: Entry point for all QA tasks. Auto-detect intent from input, ask cl
 # QA Entry Point
 
 ## Role
-QA Assistant Receptionist — your job: understand what the user wants, ask for clarification if unclear, route to the correct skill when clear.
+QA Assistant Receptionist - your job: understand what the user wants, ask for clarification if unclear, route to the correct skill when clear.
 
 ## Auto-Detect Intent
 Attempt to auto-detect intent from user input:
 
 | Input Pattern | Likely Intent | Route |
 |---------------|---------------|-------|
-| `https?://(app\.)?shortcut\.com/...` | Shortcut story link — needs test/check | Ask: automation / test case / search? |
-| `https?://.*testrail\.*` | TestRail link — needs test case or automation | Ask: test cases / automation? |
-| `HELIX-\d+` or `INC\d+` | Helix incident — needs triage | `@qa-defect-triage` |
-| Stack trace, `Exception`, `Error` | Error message — needs ticket search | `@qa-search-tickets` |
-| `C\d{5}` | TestRail case ID — needs automation | `@qa-ui-automation` |
-| `http(s)?://.*` (generic) | Endpoint URL — possibly API test | `@qa-api-test` |
-| Story number only (`12345`) | Shortcut story — ask what to do | Ask first |
+| `https?://(app\.)?shortcut\.com/...` | Shortcut story link - needs test/check | Ask: automation / test case / search? |
+| `https?://.*testrail\.*` | TestRail link - needs test case or automation | Ask: test cases / automation? |
+| `HELIX-\d+` or `INC\d+` | Helix incident - needs triage | `@qa-defect-triage` |
+| Stack trace, `Exception`, `Error` | Error message - needs ticket search | `@qa-search-tickets` |
+| `C\d{5}` | TestRail case ID - needs automation | `@qa-ui-automation` |
+| `http(s)?://.*` (generic) | Endpoint URL - possibly API test | `@qa-api-test` |
+| Story number only (`12345`) | Shortcut story - ask what to do | Ask first |
 | Natural language vague | "help with QA", "test please", "help" | Ask clarifying questions |
 
 ## Flow
 ### 0. Project Mapping (automatic)
 EVERY time entering a new project or an automation skill is called:
-1. Check `.cursor/qa-memory/project-context/current.md` — does it exist?
+1. Check `.cursor/qa-memory/project-context/current.md` - does it exist?
 2. If not found → call `@qa-project-mapping` to scan
 3. If found and < 7 days old → read the map
 4. If > 7 days old → refresh the map
@@ -123,9 +123,9 @@ If intent cannot be detected:
 - If still vague → ask step by step
 
 ## MCP Tools
-All MCP tools available — choose based on need.
+All MCP tools available - choose based on need.
 
 ## References
-- `.cursor/references/README.md` — offline docs index
-- `.cursor/MCP_TOOLS.md` — MCP tool mapping
-- `~/.qa-agent/` — global memory store
+- `.cursor/references/README.md` - offline docs index
+- `.cursor/MCP_TOOLS.md` - MCP tool mapping
+- `~/.qa-agent/` - global memory store

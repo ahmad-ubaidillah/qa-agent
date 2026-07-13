@@ -21,18 +21,18 @@ Check completeness: environment, order ID, product, error message, screenshots, 
 - Provide **Evidence Quality Score** (0-100)
 
 ### Step 3: Check Memory
-- Check cache: `node ~/.qa-agent/lib/store.js cache get <hash>` — find similar incidents
-- Check decision memory: `node ~/.qa-agent/lib/store.js cor list "triage" "1"` — learn from previous triages
-- Also check: `node ~/.qa-agent/lib/store.js cor list "triage" "-10"` — avoid past mistakes (score < 0)
-- Read `.cursor/qa-memory/project-context/current.md` — understand project mapping
+- Check cache: `node ~/.qa-agent/lib/store.js cache get <hash>` - find similar incidents
+- Check decision memory: `node ~/.qa-agent/lib/store.js cor list "triage" "1"` - learn from previous triages
+- Also check: `node ~/.qa-agent/lib/store.js cor list "triage" "-10"` - avoid past mistakes (score < 0)
+- Read `.cursor/qa-memory/project-context/current.md` - understand project mapping
 
 ### Step 4: Universal Shortcut Search
-`search_stories(query)` — search ALL work item types, ALL statuses
+`search_stories(query)` - search ALL work item types, ALL statuses
 - Search duplicates: if similarity >= 80% → generate "follow existing ticket" email → STOP
 - Search related tickets: defects, stories, investigations
 
 ### Step 5: Knowledge Investigation
-Glean: `search(query)`, `read_document(url)` — Confluence/knowledge base
+Glean: `search(query)`, `read_document(url)` - Confluence/knowledge base
 Search: product docs, known issues, runbooks, troubleshooting guides
 
 ### Step 6: Historical Analysis
@@ -74,10 +74,11 @@ Show the draft to the user:
 **Related Test Cases:** C12345, C12346
 ```
 
-Ask: "APPROVE (create ticket), EDIT (correct draft), or REJECT?"
-- **APPROVE** → `create_story(...)` via Shortcut MCP + save to memory
-- **EDIT** → apply corrections → preview again → loop
-- **REJECT** → save rejection reason to memory
+Ask user (type number or custom):
+1. APPROVE - create ticket via `create_story(...)` + save to memory
+2. EDIT - apply corrections -> preview again -> loop
+3. REJECT - save rejection reason to memory
+or type your own answer
 
 ### Step 12: Save to Memory
 - Cache results: `node ~/.qa-agent/lib/store.js cache set <hash> "<query>" '<results>'`
@@ -85,15 +86,15 @@ Ask: "APPROVE (create ticket), EDIT (correct draft), or REJECT?"
 - Update `project-context/current.md` if new info (ownership, component mapping)
 
 ## Key Decision Points
-- **Duplicate (similarity >= 80%)** — Generate "follow existing ticket" email → STOP
-- **Not Defect** (Expected/User Error/Configuration) — Generate explanation email → STOP
-- **Need Help** — Draft Need Help ticket → wait approval
-- **Defect** — Draft Defect ticket + RCA + test cases → wait approval
+- **Duplicate (similarity >= 80%)** - Generate "follow existing ticket" email → STOP
+- **Not Defect** (Expected/User Error/Configuration) - Generate explanation email → STOP
+- **Need Help** - Draft Need Help ticket → wait approval
+- **Defect** - Draft Defect ticket + RCA + test cases → wait approval
 
 ## MCP Tools
 - **Shortcut**: `search_stories(query)`, `create_story(...)` (ONLY after APPROVE), `update_story(...)`
-- **Glean**: `search(query)`, `read_document(url)` — Confluence/knowledge
-- **TestRail**: `get_cases(...)`, `get_runs(...)` — test coverage analysis
+- **Glean**: `search(query)`, `read_document(url)` - Confluence/knowledge
+- **TestRail**: `get_cases(...)`, `get_runs(...)` - test coverage analysis
 
 ## References
 - Full process: `reference/triage-process.md`

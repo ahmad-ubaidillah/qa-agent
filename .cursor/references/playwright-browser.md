@@ -33,13 +33,13 @@ browser_evaluate(script: 'document.documentElement.outerHTML')
 
 ### Locators & Selectors
 Priority order (most stable first):
-1. `data-testid` — `[data-testid="login-button"]`
-2. `data-namespace` / `data-id` — `[data-namespace="quote"]`
-3. `role` + `name` — `button[name="Submit"]`, `textbox[name="Email"]`
-4. `label` — `text=Submit`, `label="Email Address"`
-5. `#id` — `#login-form`
-6. CSS selectors — `.btn-primary`, `div.form-group > input`
-7. XPath (last resort) — `//button[contains(text(), 'Submit')]`
+1. `data-testid` - `[data-testid="login-button"]`
+2. `data-namespace` / `data-id` - `[data-namespace="quote"]`
+3. `role` + `name` - `button[name="Submit"]`, `textbox[name="Email"]`
+4. `label` - `text=Submit`, `label="Email Address"`
+5. `#id` - `#login-form`
+6. CSS selectors - `.btn-primary`, `div.form-group > input`
+7. XPath (last resort) - `//button[contains(text(), 'Submit')]`
 
 ### Click
 ```javascript
@@ -99,7 +99,7 @@ browser_set_input_files(selector: 'input[type="file"]', files: ['/path/to/file.p
 
 ## Element Collection Strategy (POM Builder)
 1. Navigate to page
-2. Get accessibility tree — gives you roles, names, and hierarchy
+2. Get accessibility tree - gives you roles, names, and hierarchy
 3. Map visible elements:
    - Form inputs → `textbox`, `searchbox`
    - Buttons → `button`, `link`
@@ -109,7 +109,7 @@ browser_set_input_files(selector: 'input[type="file"]', files: ['/path/to/file.p
 4. Create alias file with stable selectors
 
 ## Best Practices
-1. Prefer `data-testid` — most stable across UI changes
+1. Prefer `data-testid` - most stable across UI changes
 2. Use accessibility tree before raw HTML
 3. Screenshot after each step for exploration log
 4. Wait for elements before interaction

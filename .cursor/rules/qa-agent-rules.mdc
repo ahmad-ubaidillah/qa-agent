@@ -1,9 +1,9 @@
 ---
-description: "QA Agent shared rules — anti-hallucination, output rules, language, safety gates, memory protocol, skill routing"
+description: "QA Agent shared rules - anti-hallucination, output rules, language, safety gates, memory protocol, skill routing"
 alwaysApply: true
 ---
 
-# QA Agent — Shared Rules
+# QA Agent - Shared Rules
 
 ## Anti-Hallucination
 - NEVER guess or make up. If unsure, say "I don't know" and ask.
@@ -23,7 +23,7 @@ alwaysApply: true
 - NEVER create tickets or test cases without user approval.
 - NEVER commit `.cursor/qa-memory/` or `mcp.json`.
 - NEVER suppress types (`as any`, `@ts-ignore`).
-- NEVER paste full screenshots into chat — visual regression uses text reports.
+- NEVER paste full screenshots into chat - visual regression uses text reports.
 - Preview before write. ALWAYS run decision ladder: YAGNI → Reuse → Stdlib → Native → Existing Dep → One-liner → Minimum.
 
 ## Memory Protocol
@@ -44,7 +44,7 @@ Use `node ~/.qa-agent/lib/store.js` for all global memory operations.
 - After learning: `node ~/.qa-agent/lib/store.js know add <domain> <topic> <content> '<tags>'`
 - Before research: `node ~/.qa-agent/lib/store.js know search <text>`
 
-**Project (`.cursor/qa-memory/`)** — project-context/current.md, generated-tests/
+**Project (`.cursor/qa-memory/`)** - project-context/current.md, generated-tests/
 
 ## Skill Routing
 | Task | Invoke |

@@ -13,17 +13,17 @@ Ask the user:
    - If yes → read the story via Shortcut MCP (`get_story`)
    - If not → ask for a brief feature description
 2. **Coverage**: "What test cases are needed?"
-   - **Positive only** — just the happy path
-   - **Positive + Negative** — functional + error handling
-   - **All** — positive + negative + edge cases + boundary
+   - **Positive only** - just the happy path
+   - **Positive + Negative** - functional + error handling
+   - **All** - positive + negative + edge cases + boundary
 3. **Priority**: "Happy path only or full coverage?"
 4. **Section**: "Save to a specific TestRail section, or let me decide?"
 
 ### Step 2: Understand Context
 - Read Shortcut story → understand acceptance criteria + description
 - Check `.cursor/qa-memory/project-context/current.md` for domain knowledge
-- Check decision memory: `node ~/.qa-agent/lib/store.js cor list "test-cases" "1"` — apply proven patterns
-- Check TestRail existing cases in related section (via `get_cases`) — avoid duplicates
+- Check decision memory: `node ~/.qa-agent/lib/store.js cor list "test-cases" "1"` - apply proven patterns
+- Check TestRail existing cases in related section (via `get_cases`) - avoid duplicates
 
 ### Step 3: Research (if needed)
 - Context7 for domain-specific testing patterns
@@ -40,7 +40,7 @@ Call the decision ladder from `@qa-token-saver` before generating:
 6. **One-liner**: Can test cases be parameterized?
 7. **Minimum**: How many test cases are really needed? Don't create 20 if 5 is enough.
 
-### Step 4b: Reflexion — Self-Review Before Preview
+### Step 4b: Reflexion - Self-Review Before Preview
 BEFORE showing to the user, review the generated output:
 1. **Correctness**: Do test cases match the story's AC?
 2. **Minimality**: Is the number of test cases matching requested coverage? Or too many?
@@ -88,10 +88,11 @@ Details:
 **Expected:** ...
 ```
 
-Ask: "APPROVE, EDIT, or REJECT?"
-- **APPROVE** → Save to TestRail via `add_case()` one by one
-- **EDIT** → Ask for correction → apply → preview again → loop
-- **REJECT** → Save rejection reason to memory
+Ask user (type number or custom):
+1. APPROVE - Save to TestRail via `add_case()` one by one
+2. EDIT - Ask for correction -> apply -> preview again -> loop
+3. REJECT - Save rejection reason to memory
+or type your own answer
 
 ### Step 7: Save to TestRail
 Use TestRail MCP:
@@ -107,11 +108,11 @@ add_case(section_id: ..., title: "...", type_id: ..., priority_id: ..., estimate
 - Save to decision memory: `node ~/.qa-agent/lib/store.js cor add "test-cases" "<context>" "<issue>" "<correction>" "<lesson>" "1|-1"`
 
 ## MCP Tools
-- **Shortcut**: `get_story()` — read story + AC
-- **TestRail**: `get_cases()`, `add_case()`, `get_sections()`, `get_section()` — manage test cases
+- **Shortcut**: `get_story()` - read story + AC
+- **TestRail**: `get_cases()`, `add_case()`, `get_sections()`, `get_section()` - manage test cases
 - **Context7**: domain testing patterns
 - **Glean**: internal docs
 
 ## References
-- `.cursor/references/testrail-api.md` — TestRail format
-- `~/.qa-agent/` — global memory store
+- `.cursor/references/testrail-api.md` - TestRail format
+- `~/.qa-agent/` - global memory store
