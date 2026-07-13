@@ -22,7 +22,7 @@ Ask the user:
 ### Step 2: Understand Context
 - Read Shortcut story → understand acceptance criteria + description
 - Check `.cursor/qa-memory/project-context/current.md` for domain knowledge
-- Check `.cursor/qa-memory/corrections/test-cases.md` for previous correction patterns
+- Check `~/.qa-agent/corrections.json` for previous correction patterns
 - Check TestRail existing cases in related section (via `get_cases`) — avoid duplicates
 
 ### Step 3: Research (if needed)
@@ -104,7 +104,7 @@ add_case(section_id: ..., title: "...", type_id: ..., priority_id: ..., estimate
 
 ### Step 8: Save to Memory
 - Update `.cursor/qa-memory/generated-tests/` with references
-- Save interaction to `corrections/test-cases.md` if there were corrections
+- Append interaction to `~/.qa-agent/corrections.json` if there were corrections
 
 ## Output Rules — Token Efficiency
 ⚠️ **Chat output MUST be simple and concise.**
@@ -144,5 +144,4 @@ add_case(section_id: ..., title: "...", type_id: ..., priority_id: ..., estimate
 
 ## References
 - `.cursor/references/testrail-api.md` — TestRail format
-- `.cursor/qa-memory/corrections/test-cases.md` — previous corrections
-- `.cursor/qa-memory/MEMORY_PROTOCOL.md` — memory rules
+- `~/.qa-agent/` — global memory store

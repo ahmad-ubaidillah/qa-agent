@@ -126,4 +126,4 @@ Default: **Lite**
 ## References
 - Ponytail original: https://github.com/DietrichGebert/ponytail
 - Output Rules: available in every skill SKILL.md
-- Memory: `.cursor/qa-memory/MEMORY_PROTOCOL.md`
+- Memory: `~/.qa-agent/` (global store)

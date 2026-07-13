@@ -143,4 +143,4 @@ All MCP tools available — choose based on need.
 ## References
 - `.cursor/references/README.md` — offline docs index
 - `.cursor/MCP_TOOLS.md` — MCP tool mapping
-- `.cursor/qa-memory/MEMORY_PROTOCOL.md` — memory protocol
+- `~/.qa-agent/` — global memory store

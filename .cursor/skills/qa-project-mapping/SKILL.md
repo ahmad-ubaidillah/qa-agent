@@ -135,4 +135,4 @@ project/
 
 ## References
 - Aider's repo map: https://aider.chat/docs/repomap.html
-- Memory: `.cursor/qa-memory/MEMORY_PROTOCOL.md`
+- Memory: `~/.qa-agent/` (global store)

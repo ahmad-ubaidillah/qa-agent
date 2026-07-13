@@ -54,6 +54,8 @@ Then configure your MCP servers (**`~/.cursor/mcp.json`**):
 
 > ⚠️ Do NOT commit `~/.cursor/mcp.json` — contains personal credentials.
 
+> **Windows users:** Cursor AI agent has a [known bug](https://forum.cursor.com/t/ide-agent-ignores-terminal-integrated-defaultprofile-windows-always-uses-powershell-even-with-nushell-bash-configured/151859) where it ignores your default terminal profile and always uses PowerShell. To fix: **Settings → Agents → Legacy Terminal Tool: ON**. If using PowerShell 7 instead of PowerShell 5, add `pwsh` to the top of your system PATH.
+
 ### Select the Agent in Chat
 
 After restarting Cursor, select **qa-agent** from the **agent dropdown** (top-left of the chat panel) or type `@qa-agent` in chat. The agent already has all the instructions built-in — just describe your task.

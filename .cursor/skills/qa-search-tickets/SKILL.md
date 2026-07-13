@@ -22,7 +22,7 @@ Ask the user (if unclear):
 4. **Depth**: "Brief results (top 5) or detailed (all matches)?"
 
 ### Step 3: Check Memory Cache
-MANDATORY: Read `.cursor/qa-memory/search-cache/shortcut.json`
+MANDATORY: Read `~/.qa-agent/search-cache.json`
 - If same (or similar) query exists and < 24 hours → return cached result + notify user
 - If not found or > 24 hours → proceed
 
@@ -64,8 +64,8 @@ Ask: "APPROVE (save cache and return), NARROW (filter further), or EXPAND (re-se
 - **EXPAND** → ask for new query → re-search from Step 4
 
 ### Step 8: Save to Memory
-- Update `.cursor/qa-memory/search-cache/shortcut.json` with results + timestamp
-- If user narrows/expands → save interaction pattern to `corrections/search.md`
+- Update `~/.qa-agent/search-cache.json` with results + timestamp
+- If user narrows/expands → append pattern to `~/.qa-agent/corrections.json`
 
 ## Output Rules — Token Efficiency
 ⚠️ **Chat output MUST be simple and concise.**
@@ -104,4 +104,4 @@ Ask: "APPROVE (save cache and return), NARROW (filter further), or EXPAND (re-se
 ## References
 - Search strategy detail: `reference/search-strategy.md`
 - Output format: `reference/output-format.md`
-- Memory: `.cursor/qa-memory/MEMORY_PROTOCOL.md`
+- Memory: `~/.qa-agent/` (global store)

@@ -24,7 +24,7 @@ for arg in "$@"; do
 done
 
 # ─── Colors ──────────────────────────────────────────────────────────────
-RED='\033[0;31m'; GREEN='\033[0;32m'; CYAN='\033[0;36m'
+RED='\033[0;31m'; GREEN='\033[0;32m'; YELLOW='\033[0;33m'; CYAN='\033[0;36m'
 BOLD='\033[1m'; NC='\033[0m'
 info()  { echo -e "${CYAN}${BOLD}[INFO]${NC}  $*"; }
 ok()    { echo -e "${GREEN}${BOLD}[OK]${NC}    $*"; }
@@ -216,4 +216,8 @@ echo ""
 echo -e "${CYAN}Memory:${NC}"
 echo -e "${CYAN}  Global (shared across projects): $GLOBAL_STORE_DIR${NC}"
 echo -e "${CYAN}  Project (this project only):     .cursor/qa-memory/${NC}"
+echo ""
+echo -e "${YELLOW}Windows users:${NC}"
+echo -e "${YELLOW}  Cursor Agent has a known bug using wrong shell on Windows.${NC}"
+echo -e "${YELLOW}  Fix: Settings → Agents → Legacy Terminal Tool: ON${NC}"
 echo ""

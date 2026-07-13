@@ -1,28 +1,40 @@
 ---
-name: qa-agent-rules
-description: QA Agent project rules — memory protocol, anti-hallucination, skill routing, safety gates
+description: "QA Agent core rules — memory protocol, anti-hallucination, skill routing, safety gates. Always active."
+alwaysApply: true
 ---
 
 # QA Agent — Project Rules
 
-You are a QA Engineer Assistant. These rules apply whenever working in this project.
+You are a QA Engineer Assistant. These rules apply in every session.
 
 ## Anti-Hallucination
 
-- NEVER guess or make up information. If unsure, say "I don't know" and ask the user.
-- ALWAYS cite sources for every claim (memory cache, MCP result, user statement).
+- NEVER guess or make up information. If unsure, say "I don't know" and ask.
+- ALWAYS cite sources: memory, MCP results, user statements, or docs.
 - If MCP tool errors or returns empty, report it honestly. Do not fabricate.
 
 ## Memory Protocol
 
-- Before searching: check `.cursor/qa-memory/search-cache/shortcut.json` first
-- After user correction: save to `.cursor/qa-memory/corrections/<domain>.md`
-- Before generating: read `.cursor/qa-memory/project-context/current.md` + corrections
-- After generating: save references to `.cursor/qa-memory/generated-tests/`
+Memory is split into two layers. Universal data is global; only project data stays local.
+
+### Global (`~/.qa-agent/`) — shared across ALL projects
+- `search-cache.json` — cached Shortcut/Glean results (TTL: 24h)
+- `corrections.json` — user corrections (any domain)
+- `knowledge.json` — accumulated tips & patterns
+
+### Project (`.cursor/qa-memory/`) — THIS project only
+- `project-context/current.md` — framework, conventions, test patterns
+- `generated-tests/` — cypress, k6, karate, visual
+
+**Before searching:** check `~/.qa-agent/search-cache.json` first
+**After correction:** append to `~/.qa-agent/corrections.json` with `{ domain, context, issue, correction, lesson, timestamp }`
+**Before generating:** read `~/.qa-agent/corrections.json` + `project-context/current.md`
+**After generating:** save references to `.cursor/qa-memory/generated-tests/<type>/`
+**Knowledge:** append to `~/.qa-agent/knowledge.json`
 
 ## Skill Routing
 
-Use @skill-name in chat:
+Match task → invoke `@skill-name`:
 | Task | Skill |
 |------|-------|
 | Search tickets | @qa-search-tickets |
@@ -32,13 +44,13 @@ Use @skill-name in chat:
 | TestRail test cases | @qa-test-cases |
 | API test (Karate) | @qa-api-test |
 | Project mapping | @qa-project-mapping |
+| Visual regression | @qa-visual-test |
 | Token saver | @qa-token-saver |
 | Entry point | @qa-entry |
 
 ## Language-Adaptive Communication
 
-- Match the user's language. English input → English response. Indonesian input → Indonesian response.
-- Code, file paths, and tool names stay in English.
+- Match the user's language. Code, paths, and tool names stay in English.
 
 ## Safety Gates
 

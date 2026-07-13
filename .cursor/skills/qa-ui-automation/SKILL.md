@@ -99,7 +99,7 @@ If the test FAILED:
 
 ### Step 12: User Loop
 - **APPROVE** → Save to memory, update testrail-coverage.json
-- **EDIT** → Apply correction → save to `.cursor/qa-memory/corrections/automation.md`
+- **EDIT** → Apply correction → append to `~/.qa-agent/corrections.json`
 - **REJECT** → Save rejection reason to memory
 
 ### Step 13: Save to Memory
@@ -142,7 +142,7 @@ If the test FAILED:
 - Step registry: `cypress/support/step_definitions/STEP_REGISTRY.md`
 - Offline docs: `.cursor/references/playwright-browser.md`
 - Page-agent pattern: https://github.com/alibaba/page-agent
-- Memory: `.cursor/qa-memory/MEMORY_PROTOCOL.md`
+- Memory: `~/.qa-agent/` (global store)
 
 ## Language-Adaptive Communication
 

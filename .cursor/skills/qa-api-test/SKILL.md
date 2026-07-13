@@ -24,7 +24,7 @@ Ask the user:
 ### Step 2: Understand API
 - Read the story/AC to understand the business logic
 - Check `.cursor/qa-memory/project-context/current.md` for base URL and auth patterns
-- Check `.cursor/qa-memory/corrections/` for previous API test corrections
+- Check `~/.qa-agent/corrections.json` for previous API test corrections
 - If OpenAPI spec is available → read to get request/response schema
 
 ### Step 3: Research (if needed)
@@ -159,4 +159,4 @@ Ask the user: "Would you like to run it now?"
 ## References
 - `.cursor/references/karate-testing.md` — Karate syntax reference
 - `.cursor/references/git-workflow.md` — branching for PR
-- `.cursor/qa-memory/MEMORY_PROTOCOL.md`
+- `~/.qa-agent/`

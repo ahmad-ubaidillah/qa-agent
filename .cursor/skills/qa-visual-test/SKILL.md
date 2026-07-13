@@ -136,7 +136,7 @@ For each failed result:
 
 ### Step 8: Save to Memory
 - Save test summary to `.cursor/qa-memory/generated-tests/visual/`
-- Save user corrections to `corrections/visual-test.md`
+- Append user corrections to `~/.qa-agent/corrections.json`
 - Update `project-context/current.md` with baseline status
 
 ## Advanced Features (Zero Token Cost)
@@ -202,7 +202,7 @@ Options:
 - Configuration: `.cursor/skills/qa-visual-test/reference/visual-test-config.md`
 - Scripts: `scripts/run.js`, `scripts/compare.js`, `scripts/report.js`
 - Example config: `scripts/visual-test.example.json`
-- Memory: `.cursor/qa-memory/MEMORY_PROTOCOL.md`
+- Memory: `~/.qa-agent/` (global store)
 
 ## Language-Adaptive Communication
 

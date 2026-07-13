@@ -29,7 +29,7 @@ Ask the user:
 
 ### Step 2: Check Memory & Existing
 - Read `.cursor/qa-memory/project-context/current.md` — find base URL, auth pattern, existing k6 helpers
-- Read `.cursor/qa-memory/corrections/automation.md` — avoid previous mistakes
+- Read `~/.qa-agent/corrections.json` — avoid previous mistakes
 - Search for existing k6 files in the project — reuse helpers (getToken, getGlobal, defineSummary, thresholds, data generators)
 
 ### Step 3: Research (if needed)
@@ -111,7 +111,7 @@ Show the preview script + file path:
 Ask: "APPROVE, EDIT, or REJECT?"
 - **APPROVE** → save file
 - **EDIT** → ask for correction → apply → preview again
-- **REJECT** → save rejection reason to `.cursor/qa-memory/corrections/automation.md`
+- **REJECT** → append rejection reason to `~/.qa-agent/corrections.json`
 
 ### Step 8: Auto-Run (Optional)
 Ask the user: "Would you like to run it now?"
@@ -132,7 +132,7 @@ k6 run --out json=results.json path/to/test.js
 ### Step 10: Save to Memory
 - Update `.cursor/qa-memory/generated-tests/k6/` with new test reference
 - Update `project-context/current.md` if there's new info (base URL, auth pattern)
-- Save run results (metrics) to `knowledge/project-tips.md`
+- Save run results (metrics) to `~/.qa-agent/knowledge.json`
 
 ## Output Rules — Token Efficiency
 ⚠️ **Chat output MUST be simple and concise.**
@@ -172,4 +172,4 @@ k6 run --out json=results.json path/to/test.js
 ## References
 - `.cursor/references/k6-testing.md` — k6 syntax
 - `.cursor/references/git-workflow.md` — branching for perf test PR
-- `.cursor/qa-memory/MEMORY_PROTOCOL.md` — memory rules
+- `~/.qa-agent/` — global memory store

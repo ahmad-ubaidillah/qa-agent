@@ -21,8 +21,8 @@ Check completeness: environment, order ID, product, error message, screenshots, 
 - Provide **Evidence Quality Score** (0-100)
 
 ### Step 3: Check Memory
-- Read `.cursor/qa-memory/search-cache/shortcut.json` — check for similar incidents
-- Read `.cursor/qa-memory/corrections/triage.md` — learn from previous triages
+- Read `~/.qa-agent/search-cache.json` — check for similar incidents
+- Read `~/.qa-agent/corrections.json` — learn from previous triages
 - Read `.cursor/qa-memory/project-context/current.md` — understand project mapping
 
 ### Step 4: Universal Shortcut Search
@@ -79,8 +79,8 @@ Ask: "APPROVE (create ticket), EDIT (correct draft), or REJECT?"
 - **REJECT** → save rejection reason to memory
 
 ### Step 12: Save to Memory
-- Update `.cursor/qa-memory/search-cache/shortcut.json` — cache search results
-- Save triage result to `.cursor/qa-memory/corrections/triage.md`
+- Update `~/.qa-agent/search-cache.json` — cache search results
+- Append triage result to `~/.qa-agent/corrections.json`
 - Update `project-context/current.md` if new info (ownership, component mapping)
 
 ## Key Decision Points
@@ -114,7 +114,7 @@ Ask: "APPROVE (create ticket), EDIT (correct draft), or REJECT?"
 - Email templates: `reference/email-templates.md`
 - Output format: `reference/output-format.md`
 - Squad ownership: https://csg-quote-order.atlassian.net/wiki/spaces/DPE/pages/4990501020
-- Memory: `.cursor/qa-memory/MEMORY_PROTOCOL.md`
+- Memory: `~/.qa-agent/` (global store)
 
 ## Language-Adaptive Communication
 

@@ -217,3 +217,9 @@ Write-Host "Memory:" -ForegroundColor Cyan
 Write-Host "  Global (shared across projects): $GlobalStoreDir" -ForegroundColor Cyan
 Write-Host "  Project (this project only):     .cursor\qa-memory\" -ForegroundColor Cyan
 Write-Host ""
+Write-Host "Windows known issue:" -ForegroundColor Yellow
+Write-Host "  Cursor Agent has a known bug using wrong shell on Windows." -ForegroundColor Yellow
+Write-Host "  Fix: Settings -> Agents -> Legacy Terminal Tool: ON" -ForegroundColor Yellow
+Write-Host ""
+Write-Host "  If using PowerShell 7 instead of PS 5, add pwsh to the top" -ForegroundColor Yellow
+Write-Host "  of your system PATH (System Environment Variables)." -ForegroundColor Yellow
