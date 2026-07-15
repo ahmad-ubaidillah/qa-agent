@@ -4,6 +4,15 @@ All notable changes to QA Agent are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses [SemVer](https://semver.org/).
 
+## [1.2.1] - 2026-07-15
+
+### Added
+- Slash command `/qa` via `.cursor/commands/qa.md` (project + global install)
+- Ignore `.cursor/plugins/` cache; rules forbid attaching `superpowers` / `.cache-complete`
+
+### Fixed
+- `/qa` no longer depends on conflicting Cursor plugins — local command owns the name
+
 ## [1.2.0] - 2026-07-15
 
 ### Added

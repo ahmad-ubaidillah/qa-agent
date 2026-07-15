@@ -44,9 +44,15 @@ node ~/.qa-agent/lib/store.js pref set output.verbosity min
 
 > **Windows users:** Cursor AI agent has a [known bug](https://forum.cursor.com/t/ide-agent-ignores-terminal-integrated-defaultprofile-windows-always-uses-powershell-even-with-nushell-bash-configured/151859) where it ignores your default terminal profile and always uses PowerShell. To fix: **Settings → Agents → Legacy Terminal Tool: ON**. If using PowerShell 7 instead of PowerShell 5, add `pwsh` to the top of your system PATH.
 
-### Select the Agent in Chat
+### Start a session (`/qa` or `@qa`)
 
-After restarting Cursor, select **@qa** from the **agent dropdown** (top-left of the chat panel) or type `@qa` in chat. The agent already has all the instructions built-in - just describe your task.
+After restarting Cursor, use either:
+- **`/qa`** — project slash command (`.cursor/commands/qa.md`) — recommended if you like `/` shortcuts
+- **`@qa`** — custom agent from the agent dropdown
+
+Do **not** attach or open anything under `.cursor/plugins/` (e.g. `superpowers` / `.cache-complete`). That is IDE plugin cache noise; QA Agent ignores it.
+
+Then describe your task.
 
 ### Fully Customizable
 

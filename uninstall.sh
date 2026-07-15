@@ -15,6 +15,7 @@ ok()   { echo -e "${GREEN}[OK]${NC}    $*"; }
 
 GLOBAL_SKILLS="${HOME}/.cursor/skills"
 GLOBAL_AGENT="${HOME}/.cursor/agents/qa.md"
+GLOBAL_COMMAND="${HOME}/.cursor/commands/qa.md"
 GLOBAL_STORE="${HOME}/.qa-agent"
 
 SKILLS=(
@@ -43,6 +44,11 @@ done
 if [ -f "$GLOBAL_AGENT" ]; then
   rm -f "$GLOBAL_AGENT"
   ok "Removed ~/.cursor/agents/qa.md"
+fi
+
+if [ -f "$GLOBAL_COMMAND" ]; then
+  rm -f "$GLOBAL_COMMAND"
+  ok "Removed ~/.cursor/commands/qa.md"
 fi
 
 if [ "$KEEP_MEMORY" = false ]; then

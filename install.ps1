@@ -50,6 +50,7 @@ $AgentsMdSrc   = JPath $RepoDir "AGENTS.md"
 $ReadmeSrc     = JPath $RepoDir "README.md"
 $StoreSrc      = JPath $RepoDir "scripts" "store.js"
 $ContextTplSrc = JPath $RepoDir ".cursor" "templates" "project-context.current.md"
+$CommandsSrc   = JPath $RepoDir ".cursor" "commands"
 
 # ─── Global store dir (~\.qa-agent\) ──────────────────────────────────────
 $GlobalStoreDir = Join-Path $env:USERPROFILE ".qa-agent"
@@ -215,6 +216,22 @@ if (Test-Path $McpToolsSrc) {
         Copy-Item -Path $McpToolsSrc -Destination $Target -Force:$Force
         Write-Ok "MCP_TOOLS.md installed"
     }
+}
+
+# ─── Slash command /qa (beats plugin noise) ───────────────────────────────
+$CmdSrc = Join-Path $CommandsSrc "qa.md"
+$GlobalCommandsDir = JPath $env:USERPROFILE ".cursor" "commands"
+New-Item -ItemType Directory -Force -Path $GlobalCommandsDir | Out-Null
+if (Test-Path $CmdSrc) {
+    $ProjectCmdDir = JPath $TargetDir ".cursor" "commands"
+    New-Item -ItemType Directory -Force -Path $ProjectCmdDir | Out-Null
+    $ProjectCmd = Join-Path $ProjectCmdDir "qa.md"
+    if ($CmdSrc -ne $ProjectCmd) {
+        Copy-Item -Path $CmdSrc -Destination $ProjectCmd -Force:$Force
+        Write-Ok "Slash command installed (.cursor\commands\qa.md → /qa)"
+    }
+    Copy-Item -Path $CmdSrc -Destination (Join-Path $GlobalCommandsDir "qa.md") -Force
+    Write-Ok "Global slash command installed (~\\.cursor\\commands\\qa.md → /qa)"
 }
 
 # ─── Copy offline references ───────────────────────────────────────────────

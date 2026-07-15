@@ -60,6 +60,7 @@ MCP_TOOLS_SRC="$REPO_DIR/.cursor/MCP_TOOLS.md"
 AGENTS_MD_SRC="$REPO_DIR/AGENTS.md"
 STORE_SRC="$REPO_DIR/scripts/store.js"
 CONTEXT_TPL_SRC="$REPO_DIR/.cursor/templates/project-context.current.md"
+COMMANDS_SRC="$REPO_DIR/.cursor/commands"
 
 # ─── Global store dir (~/.qa-agent/) ─────────────────────────────────────
 GLOBAL_STORE_DIR="${HOME}/.qa-agent"
@@ -191,6 +192,20 @@ fi
 if [ -f "$MCP_TOOLS_SRC" ] && [ "$TARGET_DIR" != "$REPO_DIR" ]; then
   cp "$MCP_TOOLS_SRC" "$TARGET_DIR/.cursor/MCP_TOOLS.md"
   ok "MCP_TOOLS.md installed"
+fi
+
+# ─── Slash command /qa (beats plugin noise) ───────────────────────────────
+CMD_SRC="$COMMANDS_SRC/qa.md"
+GLOBAL_COMMANDS_DIR="${HOME}/.cursor/commands"
+mkdir -p "$GLOBAL_COMMANDS_DIR"
+if [ -f "$CMD_SRC" ]; then
+  mkdir -p "$TARGET_DIR/.cursor/commands"
+  if [ "$TARGET_DIR" != "$REPO_DIR" ]; then
+    cp "$CMD_SRC" "$TARGET_DIR/.cursor/commands/qa.md"
+    ok "Slash command installed (.cursor/commands/qa.md → /qa)"
+  fi
+  cp "$CMD_SRC" "$GLOBAL_COMMANDS_DIR/qa.md"
+  ok "Global slash command installed (~/.cursor/commands/qa.md → /qa)"
 fi
 
 # ─── Copy offline references ──────────────────────────────────────────────

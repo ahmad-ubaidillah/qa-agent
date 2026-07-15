@@ -1,6 +1,9 @@
 # QA Agent memory — personal learning, do not commit
 .cursor/qa-memory/
 
+# Cursor plugin cache (noisy machine-local; never relevant to QA Agent)
+.cursor/plugins/
+
 # OpenCode runtime state — machine-specific, do not commit
 .omo/
 

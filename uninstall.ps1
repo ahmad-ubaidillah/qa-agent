@@ -20,6 +20,7 @@ function Write-Ok   { Write-Host "[OK]    $args" -ForegroundColor Green }
 $HomeDir = $env:USERPROFILE
 $GlobalSkills = Join-Path $HomeDir ".cursor\skills"
 $GlobalAgent = Join-Path $HomeDir ".cursor\agents\qa.md"
+$GlobalCommand = Join-Path $HomeDir ".cursor\commands\qa.md"
 $GlobalStore = Join-Path $HomeDir ".qa-agent"
 
 $QaSkills = @(
@@ -48,6 +49,11 @@ foreach ($name in $QaSkills) {
 if (Test-Path $GlobalAgent) {
     Remove-Item -Force $GlobalAgent
     Write-Ok "Removed ~/.cursor/agents/qa.md"
+}
+
+if (Test-Path $GlobalCommand) {
+    Remove-Item -Force $GlobalCommand
+    Write-Ok "Removed ~/.cursor/commands/qa.md"
 }
 
 if (-not $KeepMemory) {
