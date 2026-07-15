@@ -1,5 +1,7 @@
 # QA Agent - AI-Powered Quality Engineering Assistant
 
+> Version: see [`VERSION`](VERSION) · Changes: [`CHANGELOG.md`](CHANGELOG.md) · Demo: [`docs/DEMO.md`](docs/DEMO.md)
+
 > **Prompt for Cursor:** Read this README and execute the setup steps. Then ask me what I want to do.
 
 QA Agent turns Cursor into a Quality Engineering assistant. Search bugs, triage incidents, generate Cypress/k6/API tests, manage TestRail cases, and run visual regression - all from chat.
@@ -22,38 +24,19 @@ The installer will:
 - Create the memory directory structure
 - Optionally install visual regression dependencies (Playwright + pixelmatch) on Windows and Unix
 
-Then configure your MCP servers (**`~/.cursor/mcp.json`**):
+Then configure MCP servers:
 
-```json
-{
-  "mcpServers": {
-    "shortcut": { "url": "https://mcp.shortcut.com/mcp" },
-    "testrail": {
-      "command": "npx", "args": ["-y", "@uarlouski/testrail-mcp-server"],
-      "env": {
-        "TESTRAIL_URL": "<your-url>",
-        "TESTRAIL_USERNAME": "<your-email>",
-        "TESTRAIL_API_KEY": "<your-api-key>"
-      }
-    },
-    "glean": { "url": "https://<tenant>-be.glean.com/mcp/default" },
-    "context7": {
-      "url": "https://mcp.context7.com/mcp",
-      "headers": { "CONTEXT7_API_KEY": "<your-key>" }
-    },
-    "cypress": {
-      "command": "npx", "args": ["-y", "cypress-mcp"],
-      "env": { "CYPRESS_PROJECT_PATH": "." }
-    },
-    "playwright": {
-      "command": "npx", "args": ["-y", "@playwright/mcp"],
-      "env": {}
-    }
-  }
-}
+1. Copy [`mcp.json.example`](mcp.json.example) → `~/.cursor/mcp.json`
+2. Replace placeholders with your credentials
+3. Restart Cursor
+
+> ⚠️ Do NOT commit `~/.cursor/mcp.json` — it contains personal credentials.
+
+Health check anytime:
+
+```bash
+node scripts/doctor.js
 ```
-
-> ⚠️ Do NOT commit `~/.cursor/mcp.json` - contains personal credentials.
 
 > **Windows users:** Cursor AI agent has a [known bug](https://forum.cursor.com/t/ide-agent-ignores-terminal-integrated-defaultprofile-windows-always-uses-powershell-even-with-nushell-bash-configured/151859) where it ignores your default terminal profile and always uses PowerShell. To fix: **Settings → Agents → Legacy Terminal Tool: ON**. If using PowerShell 7 instead of PowerShell 5, add `pwsh` to the top of your system PATH.
 
@@ -97,7 +80,7 @@ The agent saves every correction, preference, and pattern to its decision memory
 │  @qa-search-tickets  @qa-defect-triage  @qa-ui-automation│
 │  @qa-perf-test       @qa-test-cases     @qa-api-test     │
 │  @qa-project-mapping @qa-token-saver    @qa-entry        │
-│  @qa-visual-test  ← NEW: visual regression (0 token)    │
+│  @qa-visual-test                                         │
 ├──────────────────────────────────────────────────────────┤
 │  MEMORY SYSTEM (Layer 2)                                │
 │  ~/.qa-agent/ (global)  .cursor/qa-memory/ (project)   │
@@ -110,115 +93,24 @@ The agent saves every correction, preference, and pattern to its decision memory
 
 ## AI Agent Instructions (Prompt)
 
-When a user says "follow the README" or asks for QA help, follow these instructions:
+**Single source of truth:** [`AGENTS.md`](AGENTS.md)
 
-### Memory Protocol
+When a user says "follow the README" or asks for QA help:
+1. Follow `AGENTS.md` (memory, routing, safety, language)
+2. Apply `.cursor/rules/qa-agent-rules.mdc`
+3. Route to the matching skill under `.cursor/skills/`
+4. Use tool names from `.cursor/MCP_TOOLS.md`
 
-Memory is split into two layers. Use `~/.qa-agent/lib/store.js` (zero-dep Node.js CLI) for all global operations - compact, O(1) cache lookup, scoring-based decision memory.
+Skill quick map and architecture are above; do not fork a second copy of the protocol in this README.
 
-#### Global Memory (`~/.qa-agent/`) - Shared across ALL projects
+Install / lifecycle:
 
-Storage engine:
-- `lib/store.js` - CLI for all data access
-- `search-cache.json` - cache MCP results (Map-based, short keys)
-- `corrections.json` - scoring-based decision memory (positive=good, negative=bad)
-- `knowledge.json` - patterns & tips
-
-**Scoring system:**
-- `score: +1` = user confirmed correct; `score: -1` = user rejected
-- Repeated feedback accumulates (e.g. +1 three times = score+3)
-- Dynamic: a "good" pattern that later gets negative feedback will decrease
-- `score > 0` → pattern to recommend; `score < 0` → pattern to reject
-- `score = 0` → neutral / insufficient signal
-
-**Protocol:**
-
-1. **Before MCP search**: `cache hash "<query>"` then `cache get <hash>` — if non-null, use it (TTL 24h)
-2. **After MCP call**: `cache set <hash> "<query>" '<results>'`
-3. **After user correction**: save with score (`cor add ... 1` or `-1`; same issue accumulates)
-4. **Before generating**: `cor list <domain> 1` (good), `cor list <domain> -999 -1` (bad), `know search <topic>`
-5. **Before accepting user suggestion**: `cor search <topic>` → reject if score < 0
-6. **After learning**: `know add <domain> <topic> <content> '<tags>'`
-
-#### Project Memory (`.cursor/qa-memory/`) - THIS project only
-
-| File | Purpose |
-|------|---------|
-| `project-context/current.md` | Framework, conventions, test patterns |
-| `generated-tests/` | Generated test references (cypress, k6, karate, visual) |
-
-### Skill Routing - Match task to skill
-
-**@qa-search-tickets:** User pastes error / asks "search ticket about..."
-1. Expand their words into 3-4 search queries
-2. `cache hash` then `cache get` — return cached if hit
-3. Call Shortcut `stories-search` - if no results, try Glean
-4. Show: similar tickets + relevance score + ownership prediction
-
-**@qa-defect-triage:** User gives Helix link / bug report
-1. Search duplicate tickets in Shortcut
-2. Classify: type (bug/feature/infra) + severity (crash/major/minor)
-3. Draft ticket summary + RCA + test coverage
-4. Ask approval before creating ticket
-
-**@qa-ui-automation:** User says "create automation" or gives TestRail ID
-1. Ask: environment + user credentials
-2. Read project context from memory
-3. Read TestRail case for AC
-4. Use Playwright to explore page → build POM
-5. Generate: alias file + step definitions + `.feature` file
-6. Run via Cypress MCP → auto-heal if failed (max 2 attempts)
-7. Show preview -> wait for user decision: 1. APPROVE, 2. EDIT, 3. REJECT, or custom
-
-**@qa-perf-test:** User says "create perf test" or gives Story ID
-1. Read Shortcut story for AC
-2. Research via Context7 for k6 patterns
-3. Generate k6 script with thresholds + risk analysis
-4. Create git branch `perf/<id>-<desc>`
-5. Run & validate
-
-**@qa-test-cases:** User says "create test cases"
-1. Ask: coverage type (positive/negative/all)
-2. Read Shortcut story
-3. Check existing TestRail cases to avoid duplicates
-4. Generate + preview -> decision: 1. APPROVE -> save to TestRail, 2. EDIT, 3. REJECT, or custom
-
-**@qa-visual-test:** User says "check UI" / "visual regression"
-1. Ask: URL + pages to test
-2. If first time: run with `--update-baselines`
-3. Run: `node .cursor/skills/qa-visual-test/scripts/run.js --url <url> --pages <names>`
-4. Parse JSON report - on failure, HTML report is auto-generated
-5. Never load full screenshots into chat. Use diff image only if asked.
-
-### Safety Gates (NEVER violate)
-
-- NEVER create Shortcut tickets or TestRail cases without user approval
-- NEVER commit `.cursor/qa-memory/` or `~/.cursor/mcp.json`
-- ALWAYS use the decision ladder before generating tests: `YAGNI → Reuse → Stdlib → Native → Existing Dep → One-liner → Minimum → Reflexion`
-- ALWAYS preview generated tests before writing to disk
-- ALWAYS follow memory protocol before MCP calls
-- NEVER suppress types with `as any` or `@ts-ignore`
-- NEVER paste full screenshots into chat
-- NEVER load full images into conversation - visual regression uses text reports
-
-### Output Rules - Be Terse
-
-```
-✅ Generated: .cursor/skills/qa-visual-test/baselines/login.png
-• login:     PASS (0% diff)
-• dashboard: PASS (0.0003% diff)
-• settings:  NEW (baseline created)
-```
-
-- Show paths and status, not full file contents
-- Bullet points, not paragraphs
-- On error: 1-line summary + file + line, not stack trace
-- Save details to memory, not in chat
-
-### Language-Adaptive Communication
-
-- Mirror the user's language (English, Indonesian, Japanese, etc.)
-- Code, file paths, and MCP tool names stay in English
+| Action | Windows | macOS / Linux |
+|--------|---------|---------------|
+| Install | `.\install.ps1` | `./install.sh` |
+| Update | `.\update.ps1` | `./update.sh` |
+| Uninstall global | `.\uninstall.ps1` | `./uninstall.sh` |
+| Doctor | `node scripts\doctor.js` | `node scripts/doctor.js` |
 
 ## File Structure
 
@@ -228,44 +120,31 @@ Storage engine:
 ├── corrections.json              ← User corrections
 └── knowledge.json                ← Patterns & tips
 
+AGENTS.md                            ← Agent SSOT (behavior / memory / routing)
+VERSION · CHANGELOG.md · mcp.json.example · docs/DEMO.md
+scripts/store.js · doctor.js · store.test.js
+install.* · update.* · uninstall.*
+
 .cursor/
 ├── MCP_TOOLS.md                    ← MCP tool reference (live tool names)
-├── agents/qa.md                    ← Cursor subagent (@qa)
+├── agents/qa.md                    ← Thin @qa pointer → AGENTS.md
 ├── rules/qa-agent-rules.mdc        ← Always-active rules
 ├── references/                     ← Offline MCP/framework docs
 ├── templates/                      ← project-context template for install
 ├── qa-memory/                      ← Project-specific (gitignored)
-│   ├── project-context/current.md
-│   └── generated-tests/
-└── skills/                         ← 10 modular skills
-    ├── qa-visual-test/             ← Visual regression (pixelmatch)
-    │   ├── SKILL.md
-    │   ├── reference/
-    │   └── scripts/
-    │       ├── run.js              ← CLI runner
-    │       ├── compare.js          ← pixelmatch engine
-    │       └── report.js           ← HTML report generator
-    ├── qa-search-tickets/
-    ├── qa-defect-triage/
-    ├── qa-ui-automation/
-    ├── qa-perf-test/
-    ├── qa-test-cases/
-    ├── qa-api-test/
-    ├── qa-project-mapping/
-    ├── qa-token-saver/
-    └── qa-entry/
+└── skills/                         ← 10 modular skills (+ qa-visual-test/scripts)
 ```
 
 ## Visual Regression - Zero-Token Design
 
-Comparison runs in Node.js (pixelmatch), not in AI context. Cost per scenario:
+Comparison runs in Node.js (pixelmatch), not in AI context. Illustrative chat cost (order-of-magnitude, not a benchmark):
 
-| Scenario | AI Tokens | What Happens |
-|----------|-----------|-------------|
-| All PASS | ~10 | "✅ 3/3 passed" |
-| Has FAIL | ~30 + HTML report | "❌ 1 failed - see HTML report under OS temp (qa-visual-report/)" |
-| User asks "what changed?" | ~300 | `look_at` diff image once |
-| HTML report itself | **0** | Self-contained file, user opens directly |
+| Scenario | Chat payload | What Happens |
+|----------|--------------|-------------|
+| All PASS | Tiny text status | "✅ 3/3 passed" |
+| Has FAIL | Short summary + HTML path | Open report under OS temp (`qa-visual-report/`) |
+| User asks "what changed?" | Optional diff image | Only if explicitly requested |
+| HTML report itself | Outside the LLM | Self-contained file, user opens directly |
 
 **Quick start:**
 ```bash
@@ -297,25 +176,29 @@ Two layers - universal data is global, project data stays local.
     └── visual/
 ```
 
-## Token Efficiency
+## Token Efficiency (design intent)
 
-| Strategy | Saving |
+These are **architecture choices**, not independently measured savings. Prefer short context over loading everything:
+
+| Strategy | Intent |
 |----------|--------|
-| Modular skills - load only 1 per task | ~70% |
-| Search cache - 24h TTL, no repeat MCP calls | ~60% |
-| Reference files - detail in `reference/`, not SKILL.md | ~40% |
-| Memory protocol - read before MCP call | ~50% |
-| Visual regression - pixelmatch (0 token math) | ~99% vs AI-based comparison |
+| Modular skills | Load one skill workflow per task |
+| Search cache (24h TTL) | Avoid repeat MCP calls for the same query |
+| `reference/` files | Keep `SKILL.md` short; pull detail on demand |
+| Memory protocol | Read corrections/knowledge before new research |
+| Visual regression | Run pixel math in Node (no image bytes in the LLM loop) |
 
-**Estimated per session:** < 500 tokens for instructions (User Rules + 1 skill + relevant memory).
+For a first successful path, see [`docs/DEMO.md`](docs/DEMO.md).
 
 ## Testing
 
 ```bash
+node scripts/doctor.js
 node scripts/store.test.js
+cd .cursor/skills/qa-visual-test/scripts && npm install && node compare.test.js
 ```
 
-CI (GitHub Actions) runs this self-check plus a skill-structure smoke test on push/PR.
+CI (GitHub Actions) runs store checks, skill structure, and the visual compare smoke test.
 
 ## Future Enhancements
 
@@ -325,7 +208,7 @@ CI (GitHub Actions) runs this self-check plus a skill-structure smoke test on pu
 | Karate API test skill (`@qa-api-test`) | ✅ Done |
 | Multi-project memory | 📋 Planned |
 | Slack integration | 🔮 Research |
-| CI/CD integration | 🔮 Research |
+| CI/CD integration (store + compare smoke) | ✅ Partial |
 | AI test data generator | 🔮 Research |
 | Performance regression dashboard | 🔮 Research |
 

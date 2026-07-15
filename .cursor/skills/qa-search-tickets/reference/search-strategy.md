@@ -30,25 +30,24 @@ Generate: generate quote, quote generation, quote calculation, quote rendering, 
 ## Result Analysis
 For every result, analyze: Title, Description, Labels, Workflow, Feature, Objects, Tags, Ownership, Resolution. Then determine relevance.
 
-## Similarity Scoring
+## Relevance Rubric (authoritative)
+Use the point table in `../SKILL.md` Step 5 (exact phrase, feature keyword, type, recency, status, team). Band labels:
+
 | Score | Label |
 |-------|-------|
-| 100% | Exact Match |
-| 90-99% | Extremely Similar |
-| 80-89% | Highly Relevant |
-| 70-79% | Related |
-| 60-69% | Possibly Relevant |
-| Below 60% | Low Relevance |
+| 90-100 | Exact / near-duplicate |
+| 80-89 | Highly relevant |
+| 70-79 | Related |
+| 60-69 | Possible |
+| Below 60 | Low (hide unless detailed depth) |
 
-## Similarity Factors
-- Feature Match: 25%
-- Workflow Match: 25%
-- Object Match: 15%
-- Symptom Match: 20%
-- Business Intent Match: 15%
+Always explain WHY in one line, e.g.:
+`Score 94 — exact exception in title (+35), feature keyword (+15), updated 3d ago (+15), open (+5), …`
 
-Always explain WHY. Example:
-Similarity: 94% - ✅ Same Agreement feature, ✅ Same Commitment workflow, ✅ Same user action, ✅ Same symptom, ✅ Similar root cause investigation
+## Fallback Order
+1. Shortcut `stories-search` (2–4 expanded queries)
+2. If empty/error → Glean `search` for knowledge/docs
+3. If both fail → report honestly; do not invent IDs
 
 ## Ownership Prediction
 Predict based on: Historical ownership, Assignees, Labels, Similar tickets

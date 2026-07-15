@@ -18,6 +18,10 @@ param(
 
 $ErrorActionPreference = "Stop"
 
+$VersionFile = Join-Path (Split-Path -Parent $MyInvocation.MyCommand.Path) "VERSION"
+$QaVersion = if (Test-Path $VersionFile) { (Get-Content $VersionFile -Raw).Trim() } else { "dev" }
+Write-Host "QA Agent installer v$QaVersion" -ForegroundColor Cyan
+
 function JPath {
     param([Parameter(ValueFromRemainingArguments = $true)][string[]]$Parts)
     $result = $Parts[0]
@@ -277,13 +281,15 @@ Write-Host "========================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "Next steps:"
 Write-Host ""
-Write-Host "  1. Configure MCP servers -> ~\.cursor\mcp.json"
+Write-Host "  1. Copy mcp.json.example -> ~\.cursor\mcp.json and fill secrets"
 Write-Host "     See .cursor\MCP_TOOLS.md for required servers"
 Write-Host ""
-Write-Host "  2. Restart Cursor"
+Write-Host "  2. node scripts\doctor.js"
 Write-Host ""
-Write-Host "  3. Select '@qa' from the agent dropdown"
-Write-Host "     (top-left of chat panel) or type @qa"
+Write-Host "  3. Restart Cursor, select '@qa' (or type @qa)"
+Write-Host "     Demo: docs\DEMO.md"
+Write-Host ""
+Write-Host "Lifecycle: .\update.ps1  |  .\uninstall.ps1  |  CHANGELOG.md" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Memory:" -ForegroundColor Cyan
 Write-Host "  Global (shared across projects): $GlobalStoreDir" -ForegroundColor Cyan

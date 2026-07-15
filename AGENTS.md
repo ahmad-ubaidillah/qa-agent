@@ -56,6 +56,15 @@ Storage engine:
 
 ### Project (`.cursor/qa-memory/`) - THIS project only
 
+| File | Purpose |
+|------|---------|
+| `project-context/current.md` | Framework, conventions, defaults (env, team, users) |
+| `generated-tests/cypress\|k6\|karate\|visual/` | Generated test references |
+
+- **Before generating**: read `project-context/current.md`
+- **After generating**: save references under `generated-tests/<type>/`
+- Template: `.cursor/templates/project-context.current.md`
+
 ---
 
 ## Anti-Hallucination Rules (MUST FOLLOW)
@@ -121,4 +130,8 @@ Delegate to the appropriate skill by task type. Use `@skill-name` in chat:
 
 - `.cursor/MCP_TOOLS.md` - MCP tool mapping per skill
 - `.cursor/references/README.md` - offline documentation index
+- `docs/DEMO.md` - install smoke walkthrough
 - `~/.qa-agent/` - global memory store
+- `VERSION` / `CHANGELOG.md` - release identity
+
+> **Maintenance:** This file is the single source of truth for agent behavior. `.cursor/agents/qa.md` must only point here — do not duplicate protocols there.

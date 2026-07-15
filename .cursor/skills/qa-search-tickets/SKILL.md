@@ -29,35 +29,71 @@ MANDATORY:
 - If `null` → proceed
 
 ### Step 4: Search Shortcut
-Use Shortcut MCP: `stories-search` with a query string
-Query expansion strategy (details in reference/search-strategy.md):
+Use Shortcut MCP: `stories-search` with expanded query strings
+Query expansion strategy (details in `reference/search-strategy.md`):
 - Exact Match → Semantic → Feature → Workflow → Object → Symptom → Historical
 - Search ALL work item types (defect, story, chore, task, need-help, investigation, spike, enhancement)
 - Search ALL statuses (open, closed, completed, archived)
 
+Run 2–4 focused queries (not 20). Deduplicate by story ID before scoring.
+
+### Step 4b: Fallback — Glean (when Shortcut is empty or fails)
+Trigger Glean **`search`** when ANY of:
+1. Shortcut MCP errors / times out
+2. Shortcut returns **0** stories after all expanded queries
+3. User asks for Confluence / wiki / email context, not only tickets
+
+Glean query: same expanded keywords + product/feature names from the incident.
+Merge insights into the preview as a separate **Knowledge hits** section (cite URLs). Do **not** invent Shortcut IDs from Glean hits.
+
+If both Shortcut and Glean fail → report both failures honestly and stop.
+
 ### Step 5: Analyze & Score Results
-- Score relevance 0-100% based on keyword match, recency, status
+Apply the **relevance rubric** (cap at 100). Start at 0, add:
+
+| Signal | Points | How to judge |
+|--------|--------|--------------|
+| Exact error / phrase in title | +35 | Stack class, HTTP code, or ≥3 distinctive words |
+| Exact phrase in description | +20 | Same as above, body only |
+| Feature / component keyword | +15 | Matches known feature names from query expansion |
+| Same type filter (e.g. defect) | +10 | If user asked for defects |
+| Recency | +0 to +15 | Updated ≤7d: +15; ≤30d: +10; ≤90d: +5; else +0 |
+| Open / in-progress status | +5 | Prefer actionable open work slightly |
+| Same owner/team as project memory | +5 | If `project-context` names a default team |
+
+Penalties:
+- Closed/completed and user asked for "open only": −20 (or filter out)
+- Title match is only a common stopword pair: −15
+
+Labels for the table:
+- **90–100** Exact / near-duplicate
+- **80–89** Highly relevant
+- **70–79** Related
+- **60–69** Possible
+- **&lt;60** Hide unless Depth = detailed
+
+Also:
 - Cluster by type (defect vs story vs chore)
-- Predict ownership (based on story owner/team)
-- Highlight duplicate / similar tickets
+- Predict ownership from story owner/team
+- Flag pairs with score ≥80 as possible duplicates
 
 ### Step 6: Preview Results
 Show to the user in format:
 
 ```
 ## Search Results: [query]
-Found 8 tickets (0.3s)
+Found 8 tickets (sources: Shortcut [+ Glean if used])
 
 | # | Score | ID | Title | Type | Status | Owner | Updated |
 |---|-------|----|-------|------|--------|-------|---------|
 | 1 | 95%   | 123 | ...  | Defect| Open   | User  | 2d ago |
-| 2 | 82%   | 456 | ...  | Story | Closed | User  | 5d ago |
-...
 
-**Insights:** 
-- 3 open defects related to quote generation
-- 2 closed stories with similar implementation
+**Insights:**
+- 3 open defects related to …
+- Possible duplicates: #1 ↔ #3
 ```
+
+Cite: MCP tool result (+ cache hit if used).
 
 ### Step 7: User Loop
 Ask user (type number or custom):
@@ -71,8 +107,8 @@ or type your own answer
 - If user narrows/expands → save to decision memory: `node ~/.qa-agent/lib/store.js cor add "search" "<context>" "<issue>" "<pattern>" "<lesson>" "1|-1"`
 
 ## MCP Tools
-- **Shortcut**: `stories-search` - main search
-- **Glean**: `search` - if additional business context is needed
+- **Shortcut**: `stories-search` (primary), `stories-get-by-id` (detail on request)
+- **Glean**: `search` (fallback / knowledge), `read_document` (when a hit URL needs full text)
 
 ## References
 - Search strategy detail: `reference/search-strategy.md`

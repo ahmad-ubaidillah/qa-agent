@@ -15,6 +15,8 @@ jobs:
           node-version: "20"
       - name: Run store.js self-check
         run: node scripts/store.test.js
+      - name: Doctor (structure)
+        run: node scripts/doctor.js
 
   skill-structure:
     runs-on: ubuntu-latest
@@ -30,7 +32,26 @@ jobs:
             echo "OK $s"
           done
           test -f scripts/store.js
+          test -f scripts/doctor.js
           test -f .cursor/MCP_TOOLS.md
           test -f .cursor/agents/qa.md
           test -d .cursor/references
           test -f .cursor/templates/project-context.current.md
+          test -f mcp.json.example
+          test -f VERSION
+          test -f docs/DEMO.md
+          # Thin agent pointer (must reference AGENTS.md)
+          grep -q 'AGENTS.md' .cursor/agents/qa.md
+
+  visual-compare:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: Install visual deps + compare smoke
+        working-directory: .cursor/skills/qa-visual-test/scripts
+        run: |
+          npm ci
+          node compare.test.js

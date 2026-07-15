@@ -1,0 +1,37 @@
+{
+  "mcpServers": {
+    "shortcut": {
+      "url": "https://mcp.shortcut.com/mcp"
+    },
+    "testrail": {
+      "command": "npx",
+      "args": ["-y", "@uarlouski/testrail-mcp-server"],
+      "env": {
+        "TESTRAIL_URL": "https://YOUR_ORG.testrail.io",
+        "TESTRAIL_USERNAME": "your.email@example.com",
+        "TESTRAIL_API_KEY": "YOUR_TESTRAIL_API_KEY"
+      }
+    },
+    "glean": {
+      "url": "https://YOUR_TENANT-be.glean.com/mcp/default"
+    },
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "YOUR_CONTEXT7_API_KEY"
+      }
+    },
+    "cypress": {
+      "command": "npx",
+      "args": ["-y", "cypress-mcp"],
+      "env": {
+        "CYPRESS_PROJECT_PATH": "."
+      }
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"],
+      "env": {}
+    }
+  }
+}

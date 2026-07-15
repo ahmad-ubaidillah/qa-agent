@@ -15,6 +15,10 @@
 #
 set -euo pipefail
 
+HERE_EARLY="$(cd "$(dirname "$0")" && pwd)"
+QA_VERSION="$(tr -d '[:space:]' < "$HERE_EARLY/VERSION" 2>/dev/null || echo dev)"
+echo "QA Agent installer v$QA_VERSION"
+
 # ─── Args ────────────────────────────────────────────────────────────────
 FORCE=false
 for arg in "$@"; do
@@ -243,13 +247,15 @@ echo -e "${GREEN}${BOLD}━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "${BOLD}Next steps:${NC}"
 echo ""
-echo "  1. Configure MCP servers → ~/.cursor/mcp.json"
+echo "  1. Copy mcp.json.example → ~/.cursor/mcp.json and fill secrets"
 echo "     See $TARGET_DIR/.cursor/MCP_TOOLS.md for required servers"
 echo ""
-echo "  2. Restart Cursor"
+echo "  2. node scripts/doctor.js"
 echo ""
-echo "  3. Select '@qa' from the agent dropdown"
-echo "     (top-left of chat panel) or type @qa in chat"
+echo "  3. Restart Cursor, select '@qa' (or type @qa)"
+echo "     Demo: docs/DEMO.md"
+echo ""
+echo -e "${CYAN}Lifecycle: ./update.sh  |  ./uninstall.sh  |  CHANGELOG.md${NC}"
 echo ""
 echo -e "${CYAN}Memory:${NC}"
 echo -e "${CYAN}  Global (shared across projects): $GLOBAL_STORE_DIR${NC}"
