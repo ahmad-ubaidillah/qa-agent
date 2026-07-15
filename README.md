@@ -4,7 +4,9 @@
 
 > **Prompt for Cursor:** Read this README and execute the setup steps. Then ask me what I want to do.
 
-QA Agent turns Cursor into a Quality Engineering assistant. Search bugs, triage incidents, generate Cypress/k6/API tests, manage TestRail cases, and run visual regression - all from chat.
+QA Agent turns Cursor into a Quality Engineering assistant that stays **lite, fast, and small** — then gets **smarter with every correction**. Search bugs, triage incidents, generate Cypress/k6/API tests, manage TestRail cases, and run visual regression from chat, while learning your prefs and never repeating scored mistakes.
+
+**DNA:** hemat token · `boot` sekali per tugas · simpan setiap APPROVE/EDIT/REJECT · bertumbuh lewat `prefs` + `corrections`.
 
 ## Quick Start
 
@@ -32,10 +34,12 @@ Then configure MCP servers:
 
 > ⚠️ Do NOT commit `~/.cursor/mcp.json` — it contains personal credentials.
 
-Health check anytime:
+Health check & session brain:
 
 ```bash
 node scripts/doctor.js
+node ~/.qa-agent/lib/store.js boot          # prefs + top lessons (tiny)
+node ~/.qa-agent/lib/store.js pref set output.verbosity min
 ```
 
 > **Windows users:** Cursor AI agent has a [known bug](https://forum.cursor.com/t/ide-agent-ignores-terminal-integrated-defaultprofile-windows-always-uses-powershell-even-with-nushell-bash-configured/151859) where it ignores your default terminal profile and always uses PowerShell. To fix: **Settings → Agents → Legacy Terminal Tool: ON**. If using PowerShell 7 instead of PowerShell 5, add `pwsh` to the top of your system PATH.
@@ -160,8 +164,9 @@ Two layers - universal data is global, project data stays local.
 ### Global (`~/.qa-agent/`) - shared across ALL projects
 ```
 ~/.qa-agent/
+├── prefs.json             ← Your standing prefs (adapts the agent)
 ├── search-cache.json      ← Shortcut/Glean cache (TTL: 24h)
-├── corrections.json       ← User corrections (universal patterns)
+├── corrections.json       ← Scored lessons (+ grow / − never again)
 └── knowledge.json         ← Accumulated tips & patterns
 ```
 

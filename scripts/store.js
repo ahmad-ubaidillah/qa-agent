@@ -28,6 +28,12 @@
  *   know search <txt>         → text search knowledge
  *   know list [dom]           → list knowledge
  *
+ *   pref get [key]            → one pref or all
+ *   pref set <key> <value>    → save user preference (adapts agent)
+ *   pref del <key>            → remove preference
+ *
+ *   boot [domain] [n]         → tiny session load: prefs + top good/bad lessons
+ *
  *   compact                   → compact all files
  *   stats                     → show sizes & counts
  *
@@ -54,9 +60,11 @@ const STORE_DIR = path.resolve(process.env.HOME || process.env.USERPROFILE || '~
 const CACHE_FILE = path.join(STORE_DIR, 'search-cache.json');
 const COR_FILE = path.join(STORE_DIR, 'corrections.json');
 const KNOW_FILE = path.join(STORE_DIR, 'knowledge.json');
+const PREF_FILE = path.join(STORE_DIR, 'prefs.json');
 
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 const VERSION = 2;
+const BOOT_DEFAULT_N = 5;
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -308,6 +316,86 @@ function knowList(domain) {
   printJSON(entries);
 }
 
+// ─── Preferences (user adaptation — tiny key/value map) ───────────────────
+
+function prefGet(key) {
+  const store = readJSON(PREF_FILE, 'map');
+  if (!key) {
+    printJSON(store.d);
+    return;
+  }
+  printJSON(store.d[key] !== undefined ? store.d[key] : null);
+}
+
+function prefSet(key, value) {
+  if (!key) throw new Error('pref set requires <key> <value>');
+  const store = readJSON(PREF_FILE, 'map');
+  let parsed = value;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    // keep as string
+  }
+  store.d[key] = parsed;
+  store.c = now();
+  writeJSON(PREF_FILE, store);
+  printJSON({ [key]: parsed });
+}
+
+function prefDel(key) {
+  const store = readJSON(PREF_FILE, 'map');
+  delete store.d[key];
+  store.c = now();
+  writeJSON(PREF_FILE, store);
+  printJSON({ deleted: key });
+}
+
+/**
+ * Tiny session bootstrap — load only what makes the agent smarter without bloating context.
+ * Returns prefs + top-N good/bad lessons (optionally filtered by domain).
+ */
+function boot(domain, nArg) {
+  const n = Math.min(Math.max(parseInt(nArg, 10) || BOOT_DEFAULT_N, 1), 12);
+  const prefs = readJSON(PREF_FILE, 'map').d;
+  let cors = readJSON(COR_FILE).d || [];
+  if (domain) cors = cors.filter(e => e.dom === domain);
+
+  const slim = (e) => ({
+    dom: e.dom,
+    iss: e.iss,
+    les: e.les,
+    sc: e.sc || 0,
+  });
+
+  const good = cors
+    .filter(e => (e.sc || 0) > 0)
+    .sort((a, b) => (b.sc || 0) - (a.sc || 0))
+    .slice(0, n)
+    .map(slim);
+
+  const bad = cors
+    .filter(e => (e.sc || 0) < 0)
+    .sort((a, b) => (a.sc || 0) - (b.sc || 0))
+    .slice(0, n)
+    .map(slim);
+
+  const know = readJSON(KNOW_FILE).d || [];
+  const knowN = domain ? know.filter(e => e.dom === domain).length : know.length;
+  const cache = readJSON(CACHE_FILE, 'map').d || {};
+
+  printJSON({
+    prefs,
+    good,
+    bad,
+    n: {
+      cor: cors.length,
+      know: knowN,
+      cache: Object.keys(cache).length,
+      prefs: Object.keys(prefs).length,
+    },
+  });
+}
+
 // ─── Maintenance ────────────────────────────────────────────────────────────
 
 function compact() {
@@ -329,6 +417,10 @@ function compact() {
   know.c = now();
   writeJSON(KNOW_FILE, know);
 
+  const pref = readJSON(PREF_FILE, 'map');
+  pref.c = now();
+  writeJSON(PREF_FILE, pref);
+
   console.log('Compact complete');
 }
 
@@ -337,7 +429,8 @@ function stats() {
   for (const [name, file, schema] of [
     ['cache', CACHE_FILE, 'map'],
     ['corrections', COR_FILE, 'array'],
-    ['knowledge', KNOW_FILE, 'array']
+    ['knowledge', KNOW_FILE, 'array'],
+    ['prefs', PREF_FILE, 'map']
   ]) {
     const store = readJSON(file, schema);
     const size = fs.existsSync(file) ? fs.statSync(file).size : 0;
@@ -368,6 +461,12 @@ Commands:
   know add <domain> <topic> <content> <tags_json> [source]
   know search <text>
   know list [domain]
+
+  pref get [key]
+  pref set <key> <value>
+  pref del <key>
+
+  boot [domain] [n]     tiny session brain (prefs + top lessons)
 
   compact
   stats
@@ -408,6 +507,15 @@ Scoring:
           default: console.error('Unknown know subcommand:', args[1]); process.exit(1);
         }
 
+      case 'pref':
+        switch (args[1]) {
+          case 'get': return prefGet(args[2]);
+          case 'set': return prefSet(args[2], args.slice(3).join(' '));
+          case 'del': return prefDel(args[2]);
+          default: console.error('Unknown pref subcommand:', args[1]); process.exit(1);
+        }
+
+      case 'boot': return boot(args[1], args[2]);
       case 'compact': return compact();
       case 'stats': return stats();
 

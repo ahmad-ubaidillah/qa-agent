@@ -100,6 +100,7 @@ $GlobalFiles = @{
     "search-cache.json"  = '{"v":2,"c":"' + (Get-Date -Format o) + '","d":{}}'
     "corrections.json"   = '{"v":2,"c":"' + (Get-Date -Format o) + '","d":[]}'
     "knowledge.json"     = '{"v":2,"c":"' + (Get-Date -Format o) + '","d":[]}'
+    "prefs.json"         = '{"v":2,"c":"' + (Get-Date -Format o) + '","d":{}}'
 }
 foreach ($file in $GlobalFiles.Keys) {
     $path = Join-Path $GlobalStoreDir $file

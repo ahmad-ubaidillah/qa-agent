@@ -23,7 +23,13 @@ Attempt to auto-detect intent from user input:
 | Natural language vague | "help with QA", "test please", "help" | Ask clarifying questions |
 
 ## Flow
-### 0. Project Mapping (automatic)
+### 0. Boot brain (automatic — lite)
+At the start of a vague or multi-step request:
+1. `node ~/.qa-agent/lib/store.js boot` (or `boot <likely-domain>`)
+2. Apply `prefs`; follow `good`; avoid `bad`
+3. Do **not** paste the full boot JSON into chat — just act on it
+
+### 0a. Project Mapping (automatic)
 EVERY time entering a new project or an automation skill is called:
 1. Check `.cursor/qa-memory/project-context/current.md` - does it exist?
 2. If not found → call `@qa-project-mapping` to scan

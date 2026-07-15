@@ -77,6 +77,18 @@ assert(know.status === 0, "know add succeeds");
 const found = JSON.parse(run("know", "search", "bearer").out);
 assert(found.length === 1 && found[0].top === "auth", "know search finds entry");
 
+// prefs + boot (grow-with-user brain)
+const pref = run("pref", "set", "tools.skip_glean", "true");
+assert(pref.status === 0, "pref set succeeds");
+const prefGet = JSON.parse(run("pref", "get", "tools.skip_glean").out);
+assert(prefGet === true, `pref get boolean true (got ${JSON.stringify(prefGet)})`);
+
+const boot = JSON.parse(run("boot", "triage", "3").out);
+assert(boot.prefs && boot.prefs["tools.skip_glean"] === true, "boot includes prefs");
+assert(Array.isArray(boot.good) && boot.good.length === 1 && boot.good[0].sc === 2, "boot top good");
+assert(Array.isArray(boot.bad) && boot.bad.length === 1 && boot.bad[0].sc === -1, "boot top bad");
+assert(boot.n && boot.n.cor >= 2, "boot counts");
+
 // cleanup
 fs.rmSync(TMP_HOME, { recursive: true, force: true });
 

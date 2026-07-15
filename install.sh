@@ -97,7 +97,7 @@ else
 fi
 
 # Initialize JSON stores (compact format with short field names)
-for pair in 'search-cache.json:map' 'corrections.json:array' 'knowledge.json:array'; do
+for pair in 'search-cache.json:map' 'corrections.json:array' 'knowledge.json:array' 'prefs.json:map'; do
   file="${pair%%:*}"
   if [ ! -f "$GLOBAL_STORE_DIR/$file" ]; then
     echo "{\"v\":2,\"c\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"d\":$( [ "${pair##*:}" = "map" ] && echo '{}' || echo '[]' )}" > "$GLOBAL_STORE_DIR/$file"

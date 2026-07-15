@@ -4,6 +4,18 @@ All notable changes to QA Agent are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses [SemVer](https://semver.org/).
 
+## [1.2.0] - 2026-07-15
+
+### Added
+- Agent **DNA**: lite / fast / small / smart / learns / grows / token-thrifty / adapts
+- `prefs.json` + `pref get|set|del` for durable user preferences
+- `boot [domain]` — tiny session brain (prefs + top good/bad lessons)
+- Always-on learn loop in rules: every correction → memory; prefs from chat
+
+### Changed
+- `AGENTS.md` + `.mdc` rules rewritten around growth and token thrift
+- `@qa` agent description emphasizes co-evolution with the user
+
 ## [1.1.0] - 2026-07-15
 
 ### Added
