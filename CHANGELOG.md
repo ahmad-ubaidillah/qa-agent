@@ -4,6 +4,11 @@ All notable changes to QA Agent are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses [SemVer](https://semver.org/).
 
+## [1.4.7] - 2026-07-21
+
+### Fixed
+- `install.ps1`: define missing `Ensure-Dir` (was called when copying rules, caused CommandNotFoundException on Windows)
+
 ## [1.4.6] - 2026-07-21
 
 ### Added

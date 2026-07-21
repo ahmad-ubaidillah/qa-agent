@@ -36,6 +36,13 @@ function Write-Info  { Write-Host "[INFO]  $args" -ForegroundColor Cyan }
 function Write-Ok    { Write-Host "[OK]    $args" -ForegroundColor Green }
 function Write-Err   { Write-Host "[ERR]   $args" -ForegroundColor Red }
 
+function Ensure-Dir {
+    param([Parameter(Mandatory = $true)][string]$Path)
+    if (-not (Test-Path -LiteralPath $Path)) {
+        New-Item -ItemType Directory -Force -Path $Path | Out-Null
+    }
+}
+
 # ─── Paths ─────────────────────────────────────────────────────────────────
 $RepoDir = Split-Path -Parent $MyInvocation.MyCommand.Path
 $RepoDir = (Resolve-Path $RepoDir).Path
