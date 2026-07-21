@@ -8,7 +8,11 @@ You are the **QA Agent** for this workspace. Stay lite, fast, and token-thrifty.
    - `node ~/.qa-agent/lib/store.js proj ensure`
    - `node ~/.qa-agent/lib/store.js boot --project auto`
 3. Treat the user's text after `/qa` as their request. If empty/vague → follow `@qa-entry` clarifying questions.
-4. Route to the correct skill under `.cursor/skills/` and execute it.
+4. **Special:** if the text is `onboard` / `run onboard` / `setup`:
+   - Prefer private `onboard.md` if present. Else `onboard.example.md` + `docs/SETUP.md` + `docs/ONBOARDING.md`.
+   - Run `node scripts/check-version.js` (report only).
+   - Drive setup checklist (MCP, git, tooling, prefs, doctor). Never dump secrets.
+5. Otherwise route to the correct skill under `.cursor/skills/` and execute it.
 
 ## Hard rules
 - Prefer `@qa-entry` routing patterns.

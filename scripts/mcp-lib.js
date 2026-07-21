@@ -96,6 +96,91 @@ function seedCatalogFromExamples(repoRoot) {
   return { seeded: true, path: CATALOG_PATH };
 }
 
+/**
+ * Ensure FULL (and optionally OPTIONAL) server keys exist in catalog.
+ * Merges missing keys from mcp.json.example / optional.example.
+ * Never overwrites non-placeholder secrets on existing keys.
+ */
+function ensureProfileServersInCatalog(repoRoot, { optional = false } = {}) {
+  fs.mkdirSync(QA_MCP_DIR, { recursive: true });
+  const mainEx = path.join(repoRoot, 'mcp.json.example');
+  const optEx = path.join(repoRoot, 'mcp.json.optional.example');
+  const fromMain = readJsonSafe(mainEx, { mcpServers: {} }).mcpServers || {};
+  const fromOpt = readJsonSafe(optEx, { mcpServers: {} }).mcpServers || {};
+  const needed = {};
+  for (const k of FULL) {
+    if (fromMain[k]) needed[k] = fromMain[k];
+  }
+  if (optional) {
+    for (const k of OPTIONAL) {
+      if (fromOpt[k]) needed[k] = fromOpt[k];
+    }
+  }
+  const existing = readJsonSafe(CATALOG_PATH, { mcpServers: {} });
+  const before = Object.keys(existing.mcpServers || {});
+  const merged = mergeServers(existing, needed, false);
+  fs.writeFileSync(CATALOG_PATH, JSON.stringify(merged, null, 2) + '\n', 'utf8');
+  const after = Object.keys(merged.mcpServers || {});
+  const added = after.filter((k) => !before.includes(k));
+  return { path: CATALOG_PATH, added, catalog: merged };
+}
+
+/** Heuristic: value looks like a live secret (not a placeholder). */
+function looksLikeSecret(v) {
+  if (v == null || typeof v !== 'string') return false;
+  if (isPlaceholder(v)) return false;
+  if (v.length < 12) return false;
+  if (/^https?:\/\//i.test(v)) return false;
+  if (/^[A-Za-z]:[\\/]/.test(v) || v.includes('/') || v.includes('\\')) {
+    // paths - not secrets unless token-like
+    if (!/^(ghp_|gho_|github_pat_|sct_|sk-|AIza)/i.test(v)) return false;
+  }
+  return (
+    /^(ghp_|gho_|github_pat_|sct_|sk-|AIza|xox)/i.test(v) ||
+    (/[A-Za-z0-9_\-+/=]{20,}/.test(v) && !/\s/.test(v))
+  );
+}
+
+function scanSecrets(config) {
+  const hits = [];
+  const servers = (config && config.mcpServers) || {};
+  for (const [name, def] of Object.entries(servers)) {
+    const bags = [def.env, def.headers].filter(Boolean);
+    for (const bag of bags) {
+      for (const [k, v] of Object.entries(bag)) {
+        if (looksLikeSecret(String(v))) hits.push(`${name}.${k}`);
+      }
+    }
+  }
+  return hits;
+}
+
+/** Replace secret-looking values with placeholders (deep clone). */
+function redactSecrets(config) {
+  const out = deepClone(config || { mcpServers: {} });
+  for (const def of Object.values(out.mcpServers || {})) {
+    for (const bag of [def.env, def.headers].filter(Boolean)) {
+      for (const k of Object.keys(bag)) {
+        if (looksLikeSecret(String(bag[k]))) {
+          bag[k] = `REDACTED_${k}`;
+        }
+      }
+    }
+  }
+  return out;
+}
+
+/** Safe string for logs — never echo raw secrets. */
+function redactForLog(s) {
+  if (s == null) return '';
+  const t = String(s);
+  if (looksLikeSecret(t) || /API_KEY|TOKEN|SECRET|PASSWORD/i.test(t)) {
+    if (t.length <= 4) return '****';
+    return `${t.slice(0, 2)}…${t.slice(-2)} (${t.length} chars)`;
+  }
+  return t;
+}
+
 function resolveProfileKeys(profile, catalog) {
   const all = Object.keys(catalog.mcpServers || {});
   if (profile === 'all') return all;
@@ -119,7 +204,6 @@ function readPref(key) {
   if (r.status !== 0) return '';
   const out = (r.stdout || '').trim();
   if (!out || out === 'null' || out === 'undefined') return '';
-  // store may print JSON string with quotes
   try {
     const j = JSON.parse(out);
     if (typeof j === 'string') return j;
@@ -153,7 +237,6 @@ function commandOnPath(cmd) {
     shell: true,
     windowsHide: true,
   });
-  // some tools use -v
   if (r.status === 0) return true;
   const r2 = spawnSync(process.platform === 'win32' ? 'where' : 'which', [cmd], {
     encoding: 'utf8',
@@ -176,8 +259,13 @@ module.exports = {
   readJsonSafe,
   syncCatalog,
   seedCatalogFromExamples,
+  ensureProfileServersInCatalog,
   resolveProfileKeys,
   readPref,
   applyPathPrefs,
   commandOnPath,
+  looksLikeSecret,
+  scanSecrets,
+  redactSecrets,
+  redactForLog,
 };

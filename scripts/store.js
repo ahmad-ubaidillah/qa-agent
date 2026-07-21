@@ -37,6 +37,7 @@ const BOOT_PREF_BY_DOMAIN = {
   testcases: ['testcases.', 'testrail.'],
   triage: ['triage.'],
   search: ['search.'],
+  ui: ['automation.', 'ui.', 'cypress.'],
   automation: ['automation.', 'ui.', 'cypress.'],
   api: ['api.', 'karate.'],
   perf: ['perf.', 'k6.'],
@@ -561,7 +562,8 @@ function topLessons(entries, domain, n, sign) {
 
 /**
  * Keep boot prefs small: always-include prefixes + domain prefixes.
- * No domain → only BOOT_PREF_ALWAYS (plus undotted keys).
+ * Undotted keys (e.g. default_env) always included — shared across domains.
+ * No domain → BOOT_PREF_ALWAYS + undotted keys only.
  */
 function filterPrefsForBoot(prefs, domain) {
   const prefixes = [...BOOT_PREF_ALWAYS];
@@ -572,7 +574,7 @@ function filterPrefsForBoot(prefs, domain) {
   }
   const out = {};
   for (const [k, v] of Object.entries(prefs || {})) {
-    if (!domain && !k.includes('.')) {
+    if (!k.includes('.')) {
       out[k] = v;
       continue;
     }

@@ -15,6 +15,10 @@ jobs:
           node-version: "20"
       - name: Run store.js self-check
         run: node scripts/store.test.js
+      - name: Run setup-mcp self-check
+        run: node scripts/setup-mcp.test.js
+      - name: Run setup-git self-check
+        run: node scripts/setup-git.test.js
       - name: Doctor (structure)
         run: node scripts/doctor.js
 
@@ -22,25 +26,39 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Verify required skills exist
+      - name: Verify required skills and docs exist
         run: |
           set -e
           for s in qa-entry qa-search-tickets qa-defect-triage qa-ui-automation \
-                   qa-perf-test qa-test-cases qa-api-test qa-project-mapping \
+                   qa-perf-test qa-test-cases qa-test-execution qa-api-test qa-project-mapping \
                    qa-token-saver qa-visual-test; do
             test -f ".cursor/skills/$s/SKILL.md"
             echo "OK $s"
           done
           test -f scripts/store.js
           test -f scripts/doctor.js
+          test -f scripts/setup-mcp.js
+          test -f scripts/mcp-mode.js
+          test -f scripts/mcp-lib.js
+          test -f scripts/setup-git.js
+          test -f scripts/setup-tooling.js
+          test -f scripts/setup-prefs.js
+          test -f scripts/mcp-catalog-scrub.js
+          test -f scripts/check-version.js
           test -f .cursor/MCP_TOOLS.md
           test -f .cursor/agents/qa.md
           test -d .cursor/references
           test -f .cursor/templates/project-context.current.md
           test -f mcp.json.example
+          test -f mcp.json.optional.example
+          test -f mcp.json.optional.md
+          test -f onboard.example.md
           test -f VERSION
           test -f docs/DEMO.md
-          # Thin agent pointer (must reference AGENTS.md)
+          test -f docs/SETUP.md
+          test -f docs/MCP.md
+          test -f docs/ONBOARDING.md
+          test -f docs/README.md
           grep -q 'AGENTS.md' .cursor/agents/qa.md
 
   visual-compare:

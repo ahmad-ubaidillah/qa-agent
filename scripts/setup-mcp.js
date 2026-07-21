@@ -30,6 +30,7 @@ const {
   seedCatalogFromExamples,
   applyPathPrefs,
   readPref,
+  scanSecrets,
 } = require('./mcp-lib');
 
 const REPO = path.resolve(__dirname, '..');
@@ -328,6 +329,13 @@ Target: ~/.cursor/mcp.json (never commit)`);
 
   const catPath = syncCatalog(config.mcpServers);
   console.log(`Synced catalog: ${catPath}`);
+  const secretHits = scanSecrets(config);
+  if (secretHits.length) {
+    console.log(
+      `Note: ${secretHits.length} field(s) look like secrets. Do not commit mcp.json/catalog.`
+    );
+    console.log('  Scrub helper: node scripts/mcp-catalog-scrub.js --write-redacted');
+  }
 
   const miss = missingRequired(config);
   if (miss.length) {
@@ -342,10 +350,12 @@ Target: ~/.cursor/mcp.json (never commit)`);
   console.log('  2. Complete Shortcut / Glean MCP auth in Cursor if prompted');
   console.log('  3. node scripts/setup-git.js');
   console.log('  4. node scripts/setup-tooling.js   (k6 / Java / Maven)');
-  console.log('  5. node scripts/doctor.js');
-  console.log('  6. Switch profile later: node scripts/mcp-mode.js full|lite|status');
+  console.log('  5. node scripts/setup-prefs.js     (squad + paths)');
+  console.log('  6. node scripts/doctor.js');
+  console.log('  7. Switch profile later: node scripts/mcp-mode.js full|lite|status');
   console.log('');
   console.log('Do NOT commit ~/.cursor/mcp.json');
+  console.log('Never log or paste API keys into chat/PRs.');
 }
 
 if (require.main === module) {

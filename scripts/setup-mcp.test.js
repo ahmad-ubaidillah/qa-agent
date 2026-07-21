@@ -88,6 +88,30 @@ assert(resolveProfileKeys('optional', catalog).length === 8, 'profile optional =
 assert(resolveProfileKeys('all', catalog).includes('github'), 'profile all keeps github');
 assert(OPTIONAL.length === 2, 'OPTIONAL has k6+karate');
 
+const {
+  scanSecrets,
+  redactSecrets,
+  looksLikeSecret,
+} = require('./mcp-lib');
+
+assert(looksLikeSecret('ghp_abcdefghijklmnopqrstuvwxyz0123'), 'ghp_ detected as secret');
+assert(!looksLikeSecret('YOUR_TESTRAIL_API_KEY'), 'placeholder not secret');
+assert(!looksLikeSecret('https://example.com'), 'url not secret');
+
+const scrubbed = redactSecrets({
+  mcpServers: {
+    testrail: { env: { TESTRAIL_API_KEY: 'ghp_abcdefghijklmnopqrstuvwxyz0123', TESTRAIL_URL: 'https://x' } },
+  },
+});
+assert(
+  String(scrubbed.mcpServers.testrail.env.TESTRAIL_API_KEY).startsWith('REDACTED_'),
+  'redactSecrets masks key'
+);
+assert(
+  scrubbed.mcpServers.testrail.env.TESTRAIL_URL === 'https://x',
+  'redactSecrets keeps url'
+);
+
 // seed catalog in temp dir without touching user home secrets: unit only above
 const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'qa-mcp-test-'));
 assert(fs.existsSync(tmp), 'tmpdir created');

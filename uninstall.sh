@@ -20,7 +20,7 @@ GLOBAL_STORE="${HOME}/.qa-agent"
 
 SKILLS=(
   qa-entry qa-search-tickets qa-defect-triage qa-ui-automation
-  qa-perf-test qa-test-cases qa-api-test qa-project-mapping
+  qa-perf-test qa-test-cases qa-test-execution qa-api-test qa-project-mapping
   qa-token-saver qa-visual-test
 )
 
@@ -57,7 +57,13 @@ if [ "$KEEP_MEMORY" = false ]; then
     ok "Removed ~/.qa-agent"
   fi
 else
-  info "Kept ~/.qa-agent (--keep-memory)"
+  info "Kept ~/.qa-agent memory (--keep-memory)"
+  for f in mcp-mode.js mcp-lib.js; do
+    if [ -f "$GLOBAL_STORE/lib/$f" ]; then
+      rm -f "$GLOBAL_STORE/lib/$f"
+      ok "Removed lib/$f (reinstall via installer)"
+    fi
+  done
 fi
 
 echo ""

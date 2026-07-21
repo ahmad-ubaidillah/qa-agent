@@ -30,9 +30,10 @@ Receptionist: detect intent, clarify if needed, route to **one** skill. Stay sho
 | "perf" / k6 / load | `@qa-perf-test` |
 | "visual" / screenshot compare | `@qa-visual-test` |
 | "scan project" / mapping | `@qa-project-mapping` |
-| Vague | Ask: automation / search / triage / cases / plan-or-results? |
+| "onboard" / "run onboard" / first-time setup | Follow `onboard.md` if present, else `onboard.example.md` + `docs/SETUP.md`. Run `check-version.js`. |
+| Vague | Ask: automation / search / triage / cases / plan-or-results / onboard? |
 
 If unclear: ask for Shortcut, TestRail, or incident ID. Mirror user language.
 
 ## Refs
-`.cursor/references/README.md` · `.cursor/MCP_TOOLS.md` · `AGENTS.md`
+`.cursor/references/README.md` · `.cursor/MCP_TOOLS.md` · `AGENTS.md` · `docs/README.md`

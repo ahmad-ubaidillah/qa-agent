@@ -68,6 +68,10 @@ console.log("\nRepository");
   ["scripts/mcp-mode.js", path.join(REPO, "scripts", "mcp-mode.js")],
   ["scripts/setup-git.js", path.join(REPO, "scripts", "setup-git.js")],
   ["scripts/setup-tooling.js", path.join(REPO, "scripts", "setup-tooling.js")],
+  ["scripts/setup-prefs.js", path.join(REPO, "scripts", "setup-prefs.js")],
+  ["onboard.example.md", path.join(REPO, "onboard.example.md")],
+  ["docs/SETUP.md", path.join(REPO, "docs", "SETUP.md")],
+  ["docs/MCP.md", path.join(REPO, "docs", "MCP.md")],
   ["agents/qa.md", path.join(REPO, ".cursor", "agents", "qa.md")],
   ["rules/qa-agent-rules.mdc", path.join(REPO, ".cursor", "rules", "qa-agent-rules.mdc")],
   ["rules/testrail-case-draft.mdc", path.join(REPO, ".cursor", "rules", "testrail-case-draft.mdc")],
@@ -162,8 +166,20 @@ if (!exists(mcpPath)) {
 }
 
 const catalogPath = path.join(HOME, ".qa-agent", "mcp", "catalog.json");
-if (exists(catalogPath)) ok("MCP catalog ~/.qa-agent/mcp/catalog.json");
-else soft("MCP catalog missing. Run setup-mcp.js or re-install");
+if (exists(catalogPath)) {
+  ok("MCP catalog ~/.qa-agent/mcp/catalog.json");
+  try {
+    const { scanSecrets } = require("./mcp-lib");
+    const hits = scanSecrets(JSON.parse(fs.readFileSync(catalogPath, "utf-8")));
+    if (hits.length) {
+      soft(
+        `catalog may contain secrets (${hits.length} field(s)). Run: node scripts/mcp-catalog-scrub.js`
+      );
+    }
+  } catch {
+    /* ignore */
+  }
+} else soft("MCP catalog missing. Run setup-mcp.js or re-install");
 
 // Git (not MCP)
 console.log("\nGit");

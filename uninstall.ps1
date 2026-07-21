@@ -25,7 +25,7 @@ $GlobalStore = Join-Path $HomeDir ".qa-agent"
 
 $QaSkills = @(
     "qa-entry", "qa-search-tickets", "qa-defect-triage", "qa-ui-automation",
-    "qa-perf-test", "qa-test-cases", "qa-api-test", "qa-project-mapping",
+    "qa-perf-test", "qa-test-cases", "qa-test-execution", "qa-api-test", "qa-project-mapping",
     "qa-token-saver", "qa-visual-test"
 )
 
@@ -63,7 +63,14 @@ if (-not $KeepMemory) {
     }
 }
 else {
-    Write-Info "Kept ~/.qa-agent (KeepMemory)"
+    Write-Info "Kept ~/.qa-agent memory (KeepMemory)"
+    foreach ($f in @("mcp-mode.js", "mcp-lib.js")) {
+        $p = Join-Path $GlobalStore "lib\$f"
+        if (Test-Path $p) {
+            Remove-Item -Force $p
+            Write-Ok "Removed lib/$f (reinstall via installer)"
+        }
+    }
 }
 
 Write-Host ""

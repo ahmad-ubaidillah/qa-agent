@@ -4,6 +4,23 @@ All notable changes to QA Agent are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses [SemVer](https://semver.org/).
 
+## [1.4.5] - 2026-07-21
+
+### Added
+- `ensureProfileServersInCatalog`: `mcp-mode full|optional` fills missing servers from examples without wiping secrets
+- `scripts/mcp-catalog-scrub.js`: scan secret-looking fields, write `catalog.redacted.json`
+- `scripts/setup-prefs.js`: squad + paths wizard
+- `scripts/check-version.js`: local vs remote VERSION
+- `onboard.example.md` + `docs/ONBOARDING.md` (public stub vs private share)
+- Docs: `docs/SETUP.md`, `docs/MCP.md`, `docs/README.md`, expanded `docs/DEMO.md` skill matrix
+- `/qa onboard` routing in command + `@qa-entry`
+- CI: setup-mcp/setup-git tests, qa-test-execution, new scripts/docs checks
+
+### Changed
+- Boot prefs: undotted keys (e.g. `default_env`) always included. Domain `ui` mapped
+- Uninstall removes `mcp-mode.js`/`mcp-lib.js` when `--keep-memory`. Includes `qa-test-execution`
+- Doctor warns on catalog secrets + checks new docs/scripts
+
 ## [1.4.4] - 2026-07-21
 
 ### Added

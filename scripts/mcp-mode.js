@@ -2,19 +2,8 @@
 /**
  * Switch Cursor MCP profile: lite | full | optional | all | status
  *
- * lite      Shortcut, TestRail, Glean
- * full      + Context7, Cypress, Playwright (default recommended set)
- * optional  full + k6 + karate (if present in catalog)
- * all       every server in catalog (extras like github kept)
- * normal    alias of full (legacy)
- *
- * Catalog: ~/.qa-agent/mcp/catalog.json
- * Active:  ~/.cursor/mcp.json
- *
- * Usage:
- *   node scripts/mcp-mode.js status
- *   node scripts/mcp-mode.js full
- *   node ~/.qa-agent/lib/mcp-mode.js lite
+ * Before full/optional: merges missing servers from mcp.json.example into catalog
+ * (keeps existing secrets). Warns if catalog looks like it contains live tokens.
  */
 'use strict';
 
@@ -31,13 +20,26 @@ const {
   MCP_PATH,
   QA_MCP_DIR,
   CATALOG_PATH,
+  FULL,
   resolveProfileKeys,
   readJsonSafe,
   seedCatalogFromExamples,
+  ensureProfileServersInCatalog,
+  scanSecrets,
 } = lib;
 
 const backupDir = path.join(QA_MCP_DIR, 'backups');
 const statePath = path.join(QA_MCP_DIR, 'active-profile.txt');
+
+function repoRoot() {
+  if (fs.existsSync(path.join(__dirname, '..', 'mcp.json.example'))) {
+    return path.resolve(__dirname, '..');
+  }
+  // installed under ~/.qa-agent/lib — find via env or cwd
+  const cwd = process.cwd();
+  if (fs.existsSync(path.join(cwd, 'mcp.json.example'))) return cwd;
+  return path.resolve(__dirname, '..');
+}
 
 function stamp() {
   const d = new Date();
@@ -49,9 +51,7 @@ function ensureCatalog() {
   fs.mkdirSync(QA_MCP_DIR, { recursive: true });
   fs.mkdirSync(backupDir, { recursive: true });
   if (fs.existsSync(CATALOG_PATH)) return;
-  // Prefer seed from repo examples (no secrets). Else copy current mcp.json.
-  const repoRoot = path.resolve(__dirname, '..');
-  const seeded = seedCatalogFromExamples(repoRoot);
+  const seeded = seedCatalogFromExamples(repoRoot());
   if (seeded.seeded) {
     console.log('Catalog seeded from mcp.json.example (+ optional):', CATALOG_PATH);
     return;
@@ -64,6 +64,14 @@ function ensureCatalog() {
   }
   console.error('Missing catalog and mcp.json. Run: node scripts/setup-mcp.js');
   process.exit(1);
+}
+
+function warnSecrets(label, cfg) {
+  const hits = scanSecrets(cfg);
+  if (!hits.length) return;
+  console.log(`Warning: ${label} may contain live secrets (${hits.length} field(s)).`);
+  console.log('  Do not commit or share this file. Redacted copy:');
+  console.log('  node scripts/mcp-catalog-scrub.js');
 }
 
 function writeJson(p, obj) {
@@ -80,8 +88,27 @@ function normalizeMode(raw) {
 }
 
 function applyProfile(profile) {
+  if (profile === 'full' || profile === 'optional') {
+    const ens = ensureProfileServersInCatalog(repoRoot(), {
+      optional: profile === 'optional',
+    });
+    if (ens.added.length) {
+      console.log('Catalog filled missing servers:', ens.added.join(', '));
+      console.log('  (placeholders from mcp.json.example — fill keys via setup-mcp if needed)');
+    }
+  }
+
   const catalog = readJsonSafe(CATALOG_PATH, { mcpServers: {} });
-  const keys = resolveProfileKeys(profile, catalog);
+  warnSecrets('catalog', catalog);
+
+  let keys = resolveProfileKeys(profile, catalog);
+  if (profile === 'full' && keys.length < FULL.length) {
+    console.error(
+      `full profile incomplete (${keys.length}/${FULL.length}). Missing:`,
+      FULL.filter((k) => !keys.includes(k)).join(', ')
+    );
+    process.exit(1);
+  }
   if (!keys.length) {
     console.error('Profile resolved to zero servers:', profile);
     console.error('Catalog keys:', Object.keys(catalog.mcpServers || {}).join(', ') || '(none)');
@@ -102,7 +129,9 @@ function applyProfile(profile) {
 
 function status() {
   ensureCatalog();
+  ensureProfileServersInCatalog(repoRoot(), { optional: false });
   const catalog = readJsonSafe(CATALOG_PATH, { mcpServers: {} });
+  warnSecrets('catalog', catalog);
   const active = fs.existsSync(statePath) ? fs.readFileSync(statePath, 'utf8').trim() : '(unknown)';
   let current = [];
   if (fs.existsSync(MCP_PATH)) {
@@ -111,6 +140,7 @@ function status() {
   console.log('Active profile file:', active);
   console.log(`mcp.json servers (${current.length}):`, current.join(', ') || '(none)');
   console.log('Catalog:', Object.keys(catalog.mcpServers || {}).join(', ') || '(none)');
+  console.log(`Full set ready: ${FULL.every((k) => (catalog.mcpServers || {})[k]) ? 'yes' : 'no'}`);
   console.log('Profiles: lite | full (default set) | optional (+k6/karate) | all (entire catalog)');
 }
 
@@ -122,8 +152,8 @@ if (mode === 'status' || mode === 'help' || mode === '-h' || mode === '--help') 
     console.log(`Usage: node scripts/mcp-mode.js [lite|full|optional|all|status]
 
   lite       Shortcut, TestRail, Glean
-  full       + Context7, Cypress, Playwright
-  optional   full + k6 + karate (if in catalog)
+  full       + Context7, Cypress, Playwright (ensures catalog has all 6)
+  optional   full + k6 + karate (if/ensured in catalog)
   all        every key in catalog
   normal     alias of full
   status     show active / catalog`);

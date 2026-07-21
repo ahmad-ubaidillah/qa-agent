@@ -1,12 +1,24 @@
 # QA Agent - AI-Powered Quality Engineering Assistant
 
-> Version: see [`VERSION`](VERSION) · Changes: [`CHANGELOG.md`](CHANGELOG.md) · Demo: [`docs/DEMO.md`](docs/DEMO.md)
+> Version: see [`VERSION`](VERSION) · Changes: [`CHANGELOG.md`](CHANGELOG.md) · Docs: [`docs/README.md`](docs/README.md) · Demo: [`docs/DEMO.md`](docs/DEMO.md)
 
 > **Prompt for Cursor:** Read this README and execute the setup steps. Then ask me what I want to do.
 
 QA Agent turns Cursor into a Quality Engineering assistant that stays **lite, fast, and small** — then gets **smarter with every correction**. Search bugs, triage incidents, generate Cypress/k6/API tests, manage TestRail cases, and run visual regression from chat, while learning your prefs and never repeating scored mistakes.
 
 **DNA:** hemat token · `boot` sekali per tugas · simpan setiap APPROVE/EDIT/REJECT · bertumbuh lewat `prefs` + `corrections`.
+
+**Repo (teammates):** https://github.com/ahmadcsgi/qa-agent · Public onboard stub: [`onboard.example.md`](onboard.example.md)
+
+## Documentation
+
+| Doc | Topic |
+|-----|--------|
+| [docs/SETUP.md](docs/SETUP.md) | Full install |
+| [docs/MCP.md](docs/MCP.md) | MCP profiles + secrets |
+| [docs/DEMO.md](docs/DEMO.md) | Smoke + skill matrix |
+| [docs/ONBOARDING.md](docs/ONBOARDING.md) | Private vs public onboard |
+| [docs/MULTI_PROJECT_MEMORY.md](docs/MULTI_PROJECT_MEMORY.md) | Memory layers |
 
 ## Quick Start
 
