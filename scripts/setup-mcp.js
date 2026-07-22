@@ -91,7 +91,7 @@ function buildServerDefs(opts) {
   if (names.includes('testrail')) {
     servers.testrail = {
       command: 'npx',
-      args: ['-y', '@uarlouski/testrail-mcp-server'],
+      args: ['-y', '@bun913/mcp-testrail@latest'],
       env: {
         TESTRAIL_URL: DEFAULTS.TESTRAIL_URL,
         TESTRAIL_USERNAME: '',

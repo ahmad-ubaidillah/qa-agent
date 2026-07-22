@@ -1,14 +1,14 @@
 # TestRail MCP API Quick Reference
 
-Actual tool names from `@uarlouski/testrail-mcp-server` (camelCase).
+Actual tool names from `@bun913/mcp-testrail` (camelCase).
 
 ## Installation
 ```bash
-npx @uarlouski/testrail-mcp-server
+npx -y @bun913/mcp-testrail@latest
 # Config in ~/.cursor/mcp.json:
 # {
 #   "command": "npx",
-#   "args": ["-y", "@uarlouski/testrail-mcp-server"],
+#   "args": ["-y", "@bun913/mcp-testrail@latest"],
 #   "env": {
 #     "TESTRAIL_URL": "https://your-org.testrail.io",
 #     "TESTRAIL_USERNAME": "email",

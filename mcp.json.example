@@ -5,7 +5,7 @@
     },
     "testrail": {
       "command": "npx",
-      "args": ["-y", "@uarlouski/testrail-mcp-server"],
+      "args": ["-y", "@bun913/mcp-testrail@latest"],
       "env": {
         "TESTRAIL_URL": "https://testrails.live.shared-services.telflow.com",
         "TESTRAIL_USERNAME": "your.email@example.com",

@@ -4,6 +4,11 @@ All notable changes to QA Agent are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses [SemVer](https://semver.org/).
 
+## [1.5.1] - 2026-07-22
+
+### Changed
+- TestRail MCP package: `@bun913/mcp-testrail@latest` (was `@uarlouski/testrail-mcp-server`). Env vars unchanged.
+
 ## [1.5.0] - 2026-07-21
 
 ### Added
