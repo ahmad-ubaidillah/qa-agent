@@ -170,7 +170,7 @@ async function configureIdentity(opts, rl) {
   const gpgsign = gitConfig('commit.gpgsign');
   const signingkey = gitConfig('user.signingkey');
   const gpgProg = gitConfig('gpg.program');
-  console.log('\n--- GPG signing (optional, CSG often requires) ---');
+  console.log('\n--- GPG signing (optional, some orgs require Verified) ---');
   console.log(`  commit.gpgsign: ${gpgsign || '(unset)'}`);
   console.log(`  user.signingkey: ${signingkey || '(unset)'}`);
   console.log(`  gpg.program: ${gpgProg || '(unset)'}`);

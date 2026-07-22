@@ -36,8 +36,8 @@ const {
 const REPO = path.resolve(__dirname, '..');
 
 const DEFAULTS = {
-  TESTRAIL_URL: 'https://testrails.live.shared-services.telflow.com',
-  GLEAN_URL: 'https://csg-prod-be.glean.com/mcp/default',
+  TESTRAIL_URL: 'https://your-org.testrail.io',
+  GLEAN_URL: 'https://your-company.glean.com/mcp/default',
   SHORTCUT_URL: 'https://mcp.shortcut.com/mcp',
   CONTEXT7_URL: 'https://mcp.context7.com/mcp',
 };
@@ -128,7 +128,7 @@ function buildServerDefs(opts) {
       args: ['x', 'mcp'],
       env: { K6_PROJECT_PATH: '' },
     };
-    // Official karate CLI MCP. CSG Maven-only repos can skip this and use paths.api_tests.
+    // Official karate CLI MCP. Maven-only API repos can skip this and use paths.api_tests.
     servers.karate = {
       command: 'karate',
       args: ['mcp', '--stdio'],
@@ -179,7 +179,7 @@ async function promptSecrets(config, opts) {
   }
 
   if (s.glean) {
-    console.log('\n--- Glean (CSG knowledge) ---');
+    console.log('\n--- Glean (company knowledge) ---');
     s.glean.url = await ask(rl, 'Glean MCP URL', s.glean.url || DEFAULTS.GLEAN_URL);
     console.log('  (Auth often via Cursor MCP login / SSO after reload)');
   }
@@ -230,7 +230,7 @@ async function promptSecrets(config, opts) {
 
   if (s.karate) {
     console.log('\n--- Karate MCP (OPTIONAL) ---');
-    console.log('  Needs standalone `karate` CLI. Most CSG API repos use Maven only.');
+    console.log('  Needs standalone `karate` CLI. Most Maven API repos skip this MCP.');
     console.log('  Prefer: paths.api_tests + mvn test. Skip this MCP if no karate CLI.');
     const prefApi = readPref('paths.api_tests');
     s.karate.env = s.karate.env || {};

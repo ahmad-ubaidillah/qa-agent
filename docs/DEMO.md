@@ -50,7 +50,7 @@ Expect: Node, store, mcp-mode, hook (after onboard), skills, MCP catalog.
 | `run onboard` | entry / wizard |
 | paste Shortcut URL | ask: cases / UI / search |
 | `C12345` + automate | `@qa-ui-automation` |
-| Helix / INC | `@qa-defect-triage` |
+| Incident / INC | `@qa-defect-triage` |
 
 ## 3. Onboard again / resume
 

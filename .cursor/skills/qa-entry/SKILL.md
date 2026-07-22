@@ -57,7 +57,7 @@ Receptionist: detect intent, clarify if needed, route to **one** skill. Stay sho
 4. Terminal: `node scripts/onboard-wizard.js` (interactive + re-ask).
 5. One-line boot MCP status. Reload if profile switched.
 6. Multi-product: open that product folder (prefs per `proj ensure` cwd).
-7. Private `onboard.md` → offer Part C (triage/GPG). Else public stub.
+7. Private `onboard.md` → offer Part C (org overlay: triage/GPG). Else public stub.
 
 ### Question shape
 

@@ -98,7 +98,9 @@ Doctor soft-warns on missing full MCP servers, placeholders, optional CLIs, and 
 1. **Reload Cursor window** (required so `/qa` and `@qa` appear)
 2. Dry-run: `node scripts/onboard-status.js`
 3. Chat: `/qa onboard` (or `@qa` → `onboard`)
-4. Private CSG process: ask teammate for gitignored `onboard.md` (see [ONBOARDING.md](ONBOARDING.md))
+4. Private org process (optional): ask teammate for gitignored `onboard.md` (see [ONBOARDING.md](ONBOARDING.md))
+5. WSL: [WSL.md](WSL.md)
+
 
 If `/qa` is missing after Reload, see [FIRST_RUN.md](FIRST_RUN.md).
 

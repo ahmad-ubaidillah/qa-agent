@@ -52,10 +52,12 @@ Then Reload and retry `/qa`.
 3. Reload if needed. `/qa` / `@qa` should work from the global install.
 4. Prefer `/qa onboard` once so `paths.*` + sessionStart hook cover UI/API/perf folders.
 
-## Private CSG `onboard.md`
+## Private org `onboard.md`
 
 Optional. Place at repo root (gitignored). Share offline only.  
 Without it, `/qa onboard` still works via `onboard.example.md` + `docs/SETUP.md`.
+
+WSL users: [WSL.md](WSL.md).
 
 ## Status table (dry-run)
 

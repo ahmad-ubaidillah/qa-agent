@@ -283,7 +283,7 @@ function printResume(data) {
     !r.needHook &&
     !r.askTools
   ) {
-    console.log('  - Core onboard complete. Offer Part C (CSG overlay) if onboard.md present.');
+    console.log('  - Core onboard complete. Offer Part C (private overlay) if onboard.md present.');
   }
 }
 

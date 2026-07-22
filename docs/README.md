@@ -2,6 +2,7 @@
 
 | Doc | What it covers |
 |-----|----------------|
+| [WSL.md](WSL.md) | Install QA Agent under WSL + Cursor Remote-WSL |
 | [FIRST_RUN.md](FIRST_RUN.md) | **New clone:** install → Reload → `/qa onboard` |
 | [SETUP.md](SETUP.md) | Clone → install → MCP → Git → tooling → prefs → doctor |
 | [MCP.md](MCP.md) | Path-aware profiles (lite/ui/api/perf/auto) + secrets |

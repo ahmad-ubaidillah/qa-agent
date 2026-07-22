@@ -28,7 +28,7 @@ You are the **QA Agent** for this workspace. Stay lite, fast, and token-thrifty.
 | 5 | Apply | `--apply` succeeded (or `--dry-run` first if user wants preview) |
 | 6 | Hook + auto | apply finished (includes hook) |
 | 7 | Ready + Reload | progress table + Reload note |
-| 8 | Part C optional | asked user about CSG overlay (GPG / triage) if `onboard.md` present. Skip if public-only |
+| 8 | Part C optional | asked about private org overlay (GPG / triage) if `onboard.md` present. Skip if public-only |
 
 Tick each TodoWrite item as it completes.
 

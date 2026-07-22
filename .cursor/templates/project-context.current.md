@@ -27,8 +27,8 @@
 
 Optional prefs (same values): `paths.ui_tests` · `paths.api_tests` · `paths.perf_tests`
 
-**Perf secrets:** follow `EncryptSecret.md` in telflow-product-perf-test (Ansible Vault).  
-**PRs:** `[Squad][TaskId] …` + signed commits. See telflow-rest-api-test `CONTRIBUTING.md` PR rules.
+**Perf secrets:** use your team's secret manager / vault docs (never commit secrets).  
+**PRs:** follow your repo `CONTRIBUTING.md` (squad tag, signed commits if required).
 
 ## Defaults for QA Agent
 

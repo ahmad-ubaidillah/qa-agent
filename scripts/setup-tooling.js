@@ -8,7 +8,7 @@
  *   node scripts/setup-tooling.js --install
  *
  * Checks: k6, java, mvn (Maven). Optional winget/brew install.
- * Karate MCP needs a `karate` CLI binary. Most CSG API repos use Maven
+ * Karate MCP needs a `karate` CLI binary. Most Maven API repos use
  * (`mvn test`) instead — that path does NOT need karate MCP.
  */
 'use strict';
@@ -187,7 +187,7 @@ Notes:
     if (karateOk) console.log('OK  karate CLI (optional MCP possible)');
     else {
       console.log('SKIP karate CLI (optional)');
-      console.log('  Most CSG API work uses: mvn test in paths.api_tests');
+      console.log('  Most API work uses: mvn test in paths.api_tests');
       console.log('  Only install karate CLI if you want mcp.json optional "karate" entry');
     }
   }

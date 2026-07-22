@@ -83,7 +83,7 @@ node scripts/mcp-mode.js full|lite|optional|all|status
 | Tool | Default | Optional MCP |
 |------|---------|--------------|
 | **k6** | CLI in `paths.perf_tests` | `mcp.json.optional.example` → `k6 x mcp`. Or `setup-mcp.js --with-optional` |
-| **Karate** | Maven/CLI in `paths.api_tests` | Needs standalone `karate` CLI. Most CSG repos: skip MCP, use `mvn`. See `mcp.json.optional.md` |
+| **Karate** | Maven/CLI in `paths.api_tests` | Needs standalone `karate` CLI. Most Maven repos: skip MCP, use `mvn`. See `mcp.json.optional.md` |
 
 CLI install helper: `node scripts/setup-tooling.js` (k6, Java, Maven).
 

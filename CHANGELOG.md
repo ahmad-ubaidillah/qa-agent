@@ -4,6 +4,15 @@ All notable changes to QA Agent are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses [SemVer](https://semver.org/).
 
+## [1.5.2] - 2026-07-22
+
+### Changed
+- Public defaults org-neutral: TestRail/Glean placeholder URLs (no telflow / csg-prod hardcodes)
+- Docs wording: "private org overlay" instead of CSG/DGIT in committed files
+
+### Added
+- `docs/WSL.md` — install QA Agent under WSL + Cursor Remote-WSL
+
 ## [1.5.1] - 2026-07-22
 
 ### Changed

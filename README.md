@@ -15,6 +15,7 @@ QA Agent turns Cursor into a Quality Engineering assistant that stays **lite, fa
 | Doc | Topic |
 |-----|--------|
 | [docs/FIRST_RUN.md](docs/FIRST_RUN.md) | **New clone:** install → Reload → `/qa onboard` |
+| [docs/WSL.md](docs/WSL.md) | Windows + WSL Remote install |
 | [docs/SETUP.md](docs/SETUP.md) | Full install |
 | [docs/MCP.md](docs/MCP.md) | MCP profiles + secrets |
 | [docs/DEMO.md](docs/DEMO.md) | Smoke + skill matrix |

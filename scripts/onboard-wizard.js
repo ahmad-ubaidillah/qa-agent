@@ -469,7 +469,7 @@ async function applyAnswers({ squad, ui, api, perf, tools, skipMcp, interactive,
 
   console.log('Next:');
   console.log('  1. Reload Cursor window once if profile changed or MCP list stale');
-  console.log('  2. Optional Part C (CSG overlay) if onboard.md present');
+  console.log('  2. Optional Part C (private org overlay) if onboard.md present');
   console.log('  3. /qa for daily work');
   console.log('');
 }

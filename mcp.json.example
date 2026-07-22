@@ -7,13 +7,13 @@
       "command": "npx",
       "args": ["-y", "@bun913/mcp-testrail@latest"],
       "env": {
-        "TESTRAIL_URL": "https://testrails.live.shared-services.telflow.com",
+        "TESTRAIL_URL": "https://your-org.testrail.io",
         "TESTRAIL_USERNAME": "your.email@example.com",
         "TESTRAIL_API_KEY": "YOUR_TESTRAIL_API_KEY"
       }
     },
     "glean": {
-      "url": "https://csg-prod-be.glean.com/mcp/default"
+      "url": "https://your-company.glean.com/mcp/default"
     },
     "context7": {
       "url": "https://mcp.context7.com/mcp",
