@@ -1,12 +1,14 @@
 # TestRail MCP API Quick Reference
 
+Actual tool names from `@bun913/mcp-testrail` (camelCase).
+
 ## Installation
 ```bash
-npx @uarlouski/testrail-mcp-server
-# Config di ~/.cursor/mcp.json:
+npx -y @bun913/mcp-testrail@latest
+# Config in ~/.cursor/mcp.json:
 # {
 #   "command": "npx",
-#   "args": ["-y", "@uarlouski/testrail-mcp-server"],
+#   "args": ["-y", "@bun913/mcp-testrail@latest"],
 #   "env": {
 #     "TESTRAIL_URL": "https://your-org.testrail.io",
 #     "TESTRAIL_USERNAME": "email",
@@ -15,98 +17,91 @@ npx @uarlouski/testrail-mcp-server
 # }
 ```
 
-## Available Tools
+## Cases
 
-### get_cases(section_id)
-Get all test cases in a section.
+### getCases
 ```javascript
-get_cases(section_id: 123)
-// Returns: [{ id, title, type_id, priority_id, estimate, ... }]
+getCases({ projectId: 1, suiteId: 1, sectionId: 100, limit: 250 })
+getCases({ projectId: 1, suiteId: 1, refs: "12345" })
 ```
 
-### get_case(case_id)
-Detail satu test case.
+### getCase / addCase / updateCase / deleteCase / moveToSection
 ```javascript
-get_case(case_id: 456)
-// Returns: { id, title, section_id, template_id, type_id, priority_id, estimate, custom_steps, custom_expected, ... }
+getCase({ caseId: 456 })
+addCase({ sectionId: 100, title: "When …, then …", templateId: 1, customSteps: "…", customExpected: "…", customPrerequisites: "…" })
+updateCase({ caseId: 456, title: "…", customSteps: "…", customExpected: "…" })
+moveToSection({ caseIds: [456], sectionId: 100 })
 ```
 
-### add_case(section_id, title, type_id, priority_id, estimate, custom_steps, custom_expected)
-Buat test case baru.
+**ACC required** before `addCase` · `updateCase` · `deleteCase` · `addSection` (see `testrail-case-draft.mdc`).
+
+## Sections
+
 ```javascript
-add_case({
-  section_id: 123,
-  title: 'Verify user can login with valid credentials',
-  type_id: 1,        // 1=Positive, 2=Negative, 3=Edge, 4=Boundary
-  priority_id: 2,    // 1=High, 2=Medium, 3=Low
-  estimate: '5m',
-  custom_steps: '1. Open login page\n2. Enter email\n3. Enter password\n4. Click Login',
-  custom_expected: 'User is redirected to dashboard'
+getSections({ projectId: 1, suiteId: 1, limit: 250 })
+getSection({ sectionId: 100 })
+addSection({ projectId: 1, suiteId: 1, parentId: 100, name: "Child section" })
+```
+
+## Plans · runs · results
+
+### addPlan
+```javascript
+addPlan({
+  projectId: 1,
+  name: "[TEST PLAN] <version> <Squad>",
+  milestoneId: 10,
+  description: "…",
+  entries: [{
+    suite_id: 1,
+    name: "Feature area",
+    include_all: false,
+    case_ids: [101, 102]
+  }]
 })
 ```
 
-### update_case(case_id, ...)
-Update existing test case.
+### getPlans / addPlanEntry
 ```javascript
-update_case({ case_id: 456, title: 'Updated title', priority_id: 1 })
+getPlans({ projectId: 1 })
+addPlanEntry({ planId: 50, suiteId: 1, name: "Feature area", includeAll: false, caseIds: [101] })
 ```
 
-### delete_case(case_id)
-Hapus test case.
+### getRuns / getTests / addRun
 ```javascript
-delete_case(case_id: 456)
+getRuns({ projectId: 1 })
+getTests({ runId: 60 })
+addRun({ projectId: 1, suiteId: 1, name: "Smoke", includeAll: false, caseIds: [101] })
 ```
 
-### get_sections(project_id, suite_id)
-Ambil daftar section dalam project/suite.
+### addResultsForCases
 ```javascript
-get_sections(project_id: 1, suite_id: 1)
-// Returns: [{ id, name, description, ... }]
-```
-
-### get_section(section_id)
-Detail satu section.
-```javascript
-get_section(section_id: 123)
-```
-
-### get_runs(project_id)
-Ambil test runs.
-```javascript
-get_runs(project_id: 1)
-// Returns: [{ id, name, passed_count, failed_count, ... }]
-```
-
-### add_run(project_id, suite_id, name, description, include_all, case_ids)
-Buat test run baru.
-```javascript
-add_run({
-  project_id: 1,
-  suite_id: 1,
-  name: 'Smoke Test 2024-01-01',
-  description: 'Daily smoke test',
-  include_all: false,
-  case_ids: [123, 456, 789]
+addResultsForCases({
+  runId: 60,
+  results: [
+    { caseId: 101, statusId: 1, comment: "Passed for sc-12345" },
+    { caseId: 102, statusId: 1, comment: "Passed for sc-12345" }
+  ]
 })
 ```
 
-## Type IDs (configurable per project)
-| ID | Type | Used when |
-|----|------|-----------|
-| 1 | Positive | Happy path scenarios |
-| 2 | Negative | Error handling, invalid input |
-| 3 | Edge | Empty, single item, max items |
-| 4 | Boundary | Min/max values, threshold |
+| statusId | Meaning |
+|---------:|---------|
+| 1 | Pass |
+| 2 | Blocked |
+| 3 | Untested |
+| 4 | Retest |
+| 5 | Fail |
 
-## Priority IDs
-| ID | Priority | Criteria |
-|----|----------|----------|
-| 1 | High | Core functionality, blocking |
-| 2 | Medium | Important but non-blocking |
-| 3 | Low | Nice to have, cosmetic |
+### getMilestones
+```javascript
+getMilestones({ projectId: 1 })
+```
 
 ## Tips
-- Always check existing cases before adding (via `get_cases`)
-- Use `section_id` from `get_sections()` for accurate section targeting
-- Format `custom_steps` with newline (`\n`) for structured steps
-- Always get APPROVAL before `add_case`, `update_case`, `delete_case`
+- Dedup before draft: `getCases` by section **and** refs story id
+- Prefer Text template (`templateId: 1`) with `customSteps` / `customExpected` / `customPrerequisites`
+- Objective / testdata often live in custom fields (`custom_case_testcaseobjective`, `custom_case_testdata`)
+- Always APPROVAL before write tools
+- Plan naming (if used): `[TEST PLAN] <version> <Squad>`
+- Real project/suite/section IDs: from `project-context/current.md`, not hardcoded here

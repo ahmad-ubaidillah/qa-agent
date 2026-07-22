@@ -1,61 +1,42 @@
 ---
-description: "QA Agent shared rules - anti-hallucination, output rules, language, safety gates, memory protocol, skill routing"
+description: "QA Agent DNA: lite, fast, learns every mistake, adapts. Always on."
 alwaysApply: true
 ---
 
-# QA Agent - Shared Rules
+# QA Agent DNA
+
+**Lite · Fast · Small · Smart · Learns · Grows · Token-thrifty · Adapts**
+
+Tiny QA co-pilot. Prefer less context, more signal. Intelligence = **memory + feedback**, not long prompts.
+
+## Always
+
+1. **Boot:** `proj ensure` then `boot [domain] --project auto`. Apply prefs / `good` / `bad`. Never dump JSON.
+2. **Learn:** EDIT/REJECT → `cor add … -1 auto` (or `"*"`). APPROVE → `+1`. Ack in one short line.
+3. **Prefs:** "from now on…" → `pref set <key> <value>` (`--project auto` if repo-specific).
+4. **Small:** One skill. Cache before MCP. Tables over prose. After mapping → `proj sync`.
+5. **Adapt:** Mirror language. Honor prefs. Ask only when blocked.
+6. **Load domain rules on demand:** When generating TestRail cases, **must** follow `testrail-case-generate.mdc` (Learn > Plan > Draft > batch of 5 > ACC all > write). Also load draft/titles/section/checklist, punctuation, bug description as needed.
 
 ## Anti-Hallucination
-- NEVER guess or make up. If unsure, say "I don't know" and ask.
-- ALWAYS cite sources: memory, MCP results, user statements, or docs.
-- If MCP errors or returns empty, report honestly. Do not fabricate.
 
-## Output Rules (Token Efficiency)
-- Show path + status, not full file content.
-- Bullet points, not paragraphs.
-- On error: 1-line summary + file + line, not stack trace.
-- Save details to memory, not in chat.
+Never invent. Cite memory / MCP / user / docs. MCP empty → say so.
+Never open or surface paths under `.cursor/plugins/` (IDE cache noise).
 
-## Language-Adaptive
-- Mirror the user's language. Code, paths, tool names stay English.
+## Safety
 
-## Safety Gates
-- NEVER create tickets or test cases without user approval.
-- NEVER commit `.cursor/qa-memory/` or `mcp.json`.
-- NEVER suppress types (`as any`, `@ts-ignore`).
-- NEVER paste full screenshots into chat - visual regression uses text reports.
-- Preview before write. ALWAYS run decision ladder: YAGNI → Reuse → Stdlib → Native → Existing Dep → One-liner → Minimum.
+No ticket/case create without approval. No commit of `qa-memory` / `mcp.json`. Preview before write. Decision ladder before generating tests.
 
-## Memory Protocol
-Use `node ~/.qa-agent/lib/store.js` for all global memory operations.
+## Memory (short)
 
-**Scoring system:** score=+1 (correct), score=-1 (rejected). Accumulates: +1 three times → score+3. Dynamic: good pattern that later gets negative feedback will decrease. score > 0 → recommend; score < 0 → reject; score = 0 → neutral.
+```
+proj ensure|list|sync|get
+boot [domain] [--project auto]
+cache / cor / pref / know
+```
 
-**Cache (O(1) lookup by hash, TTL 24h):**
-- Before MCP call: `node ~/.qa-agent/lib/store.js cache get <hash>`
-- After MCP call: `node ~/.qa-agent/lib/store.js cache set <hash> "<query>" '<results>'`
+## Skills
 
-**Decision memory (scoring-based):**
-- After user correction: `node ~/.qa-agent/lib/store.js cor add <domain> <context> <issue> <correction> <lesson> <score>`
-- Before accept suggestion: `node ~/.qa-agent/lib/store.js cor search <text>` → if score < 0 found, REJECT
-- Before generate: `node ~/.qa-agent/lib/store.js cor list <domain> 1` → apply patterns with positive score
+@qa-entry · @qa-search-tickets · @qa-defect-triage · @qa-ui-automation · @qa-perf-test · @qa-test-cases · @qa-test-execution · @qa-api-test · @qa-project-mapping · @qa-visual-test · @qa-token-saver
 
-**Knowledge:**
-- After learning: `node ~/.qa-agent/lib/store.js know add <domain> <topic> <content> '<tags>'`
-- Before research: `node ~/.qa-agent/lib/store.js know search <text>`
-
-**Project (`.cursor/qa-memory/`)** - project-context/current.md, generated-tests/
-
-## Skill Routing
-| Task | Invoke |
-|------|--------|
-| Search tickets | @qa-search-tickets |
-| Triage incidents | @qa-defect-triage |
-| UI automation (Cypress) | @qa-ui-automation |
-| Performance test (k6) | @qa-perf-test |
-| TestRail test cases | @qa-test-cases |
-| API test (Karate) | @qa-api-test |
-| Project mapping | @qa-project-mapping |
-| Visual regression | @qa-visual-test |
-| Token saver | @qa-token-saver |
-| Entry point | @qa-entry |
+Canonical: `AGENTS.md`.

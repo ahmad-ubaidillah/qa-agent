@@ -2,16 +2,17 @@
 
 ## Index
 
-| File | Topic | Untuk Skill |
-|------|-------|-------------|
-| `shortcut-api.md` | Shortcut MCP API - search, get, create, update stories | `@qa-search-tickets`, `@qa-defect-triage` |
-| `testrail-api.md` | TestRail MCP API - get/add/update/delete cases, sections, runs | `@qa-test-cases`, `@qa-ui-automation` |
-| `helix-email.md` | Helix email templates - duplicate, defect, user error, need help | `@qa-defect-triage` |
+| File | Topic | Used by |
+|------|-------|---------|
+| `shortcut-api.md` | Shortcut MCP API - search, get, create, update, tasks, labels | `@qa-search-tickets`, `@qa-defect-triage`, `@qa-test-cases` |
+| `testrail-api.md` | Cases, sections, plans, runs, results | `@qa-test-cases`, `@qa-test-execution`, `@qa-ui-automation` |
+| `qa-testcase-methodology.md` | Analysis, dedup, risk, preview, Phase 7 plan/results, maintenance, label groom | `@qa-test-cases`, `@qa-test-execution` |
+| `incident-email.md` | Incident email templates - duplicate, defect, user error, need help | `@qa-defect-triage` |
 | `playwright-browser.md` | Playwright browser actions - navigate, click, type, POM builder | `@qa-ui-automation` |
 | `karate-testing.md` | Karate API testing - feature syntax, assertions, data-driven | `@qa-api-test` |
 | `k6-testing.md` | k6 performance testing - script structure, scenarios, thresholds | `@qa-perf-test` |
 | `git-workflow.md` | Git workflow - branch naming, commit conventions, PR | All automation skills |
 
-## Cara Pakai
-- Baca file langsung: `.cursor/references/{topic}.md`
-- Or mention in Cursor: "Look at reference for Karate" → the AI will read it automatically
+## How to use
+- Read a file directly: `.cursor/references/{topic}.md`
+- Or ask in Cursor: "Look at the Karate reference" — the agent will open it

@@ -15,6 +15,10 @@
 #
 set -euo pipefail
 
+HERE_EARLY="$(cd "$(dirname "$0")" && pwd)"
+QA_VERSION="$(tr -d '[:space:]' < "$HERE_EARLY/VERSION" 2>/dev/null || echo dev)"
+echo "QA Agent installer v$QA_VERSION"
+
 # ─── Args ────────────────────────────────────────────────────────────────
 FORCE=false
 for arg in "$@"; do
@@ -50,10 +54,15 @@ REPO_DIR="$(cd "$(dirname "$0")" && pwd 2>/dev/null || pwd)"
 SKILLS_SRC="$REPO_DIR/.cursor/skills"
 AGENTS_SRC="$REPO_DIR/.cursor/agents"
 RULES_SRC="$REPO_DIR/.cursor/rules"
+REFS_SRC="$REPO_DIR/.cursor/references"
 MEMORY_SRC="$REPO_DIR/.cursor/qa-memory"
 MCP_TOOLS_SRC="$REPO_DIR/.cursor/MCP_TOOLS.md"
 AGENTS_MD_SRC="$REPO_DIR/AGENTS.md"
 STORE_SRC="$REPO_DIR/scripts/store.js"
+MCP_LIB_SRC="$REPO_DIR/scripts/mcp-lib.js"
+MCP_MODE_SRC="$REPO_DIR/scripts/mcp-mode.js"
+CONTEXT_TPL_SRC="$REPO_DIR/.cursor/templates/project-context.current.md"
+COMMANDS_SRC="$REPO_DIR/.cursor/commands"
 
 # ─── Global store dir (~/.qa-agent/) ─────────────────────────────────────
 GLOBAL_STORE_DIR="${HOME}/.qa-agent"
@@ -73,6 +82,7 @@ mkdir -p "$TARGET_DIR/.cursor/skills"
 mkdir -p "$TARGET_DIR/.cursor/agents"
 mkdir -p "$TARGET_DIR/.cursor/rules"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/project-context"
+mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/manual"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/cypress"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/k6"
 mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/karate"
@@ -81,17 +91,34 @@ mkdir -p "$TARGET_DIR/.cursor/qa-memory/generated-tests/visual"
 # ─── Global memory store (~/.qa-agent/) ──────────────────────────────────
 info "Creating global memory store at $GLOBAL_STORE_DIR ..."
 mkdir -p "$GLOBAL_STORE_DIR/lib"
+mkdir -p "$GLOBAL_STORE_DIR/projects"
 
-# Copy storage engine
+# Copy storage engine + MCP helpers
 if [ -f "$STORE_SRC" ]; then
   cp "$STORE_SRC" "$GLOBAL_STORE_DIR/lib/store.js"
   ok "  Storage engine installed (~/.qa-agent/lib/store.js)"
 else
   err "  store.js not found at $STORE_SRC"
 fi
+if [ -f "$MCP_LIB_SRC" ]; then
+  cp "$MCP_LIB_SRC" "$GLOBAL_STORE_DIR/lib/mcp-lib.js"
+  ok "  mcp-lib.js installed"
+fi
+if [ -f "$MCP_MODE_SRC" ]; then
+  cp "$MCP_MODE_SRC" "$GLOBAL_STORE_DIR/lib/mcp-mode.js"
+  ok "  mcp-mode.js installed (lite|full|optional|all|status)"
+fi
+mkdir -p "$GLOBAL_STORE_DIR/mcp"
+if [ ! -f "$GLOBAL_STORE_DIR/mcp/catalog.json" ] && [ -f "$REPO_DIR/mcp.json.example" ]; then
+  node -e "const fs=require('fs');const p=require('path');const home=process.env.HOME;const cat=p.join(home,'.qa-agent','mcp','catalog.json');const a=JSON.parse(fs.readFileSync(process.argv[1],'utf8'));const b=fs.existsSync(process.argv[2])?JSON.parse(fs.readFileSync(process.argv[2],'utf8')):{mcpServers:{}};a.mcpServers=Object.assign({},a.mcpServers||{},b.mcpServers||{});fs.writeFileSync(cat,JSON.stringify(a,null,2)+'\n');" \
+    "$REPO_DIR/mcp.json.example" "$REPO_DIR/mcp.json.optional.example"
+  ok "  MCP catalog seeded (~/.qa-agent/mcp/catalog.json)"
+else
+  info "  MCP catalog exists - skipping seed"
+fi
 
 # Initialize JSON stores (compact format with short field names)
-for pair in 'search-cache.json:map' 'corrections.json:array' 'knowledge.json:array'; do
+for pair in 'search-cache.json:map' 'corrections.json:array' 'knowledge.json:array' 'prefs.json:map'; do
   file="${pair%%:*}"
   if [ ! -f "$GLOBAL_STORE_DIR/$file" ]; then
     echo "{\"v\":2,\"c\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"d\":$( [ "${pair##*:}" = "map" ] && echo '{}' || echo '[]' )}" > "$GLOBAL_STORE_DIR/$file"
@@ -169,10 +196,14 @@ elif [ -f "$AGENTS_SRC/qa-agent.md" ]; then
   fi
 fi
 
-# ─── Copy rules ───────────────────────────────────────────────────────────
-if [ -f "$RULES_SRC/qa-agent-rules.mdc" ] && [ "$TARGET_DIR" != "$REPO_DIR" ]; then
-  cp "$RULES_SRC/qa-agent-rules.mdc" "$TARGET_DIR/.cursor/rules/qa-agent-rules.mdc"
-  ok "Project rules installed (.cursor/rules/qa-agent-rules.mdc)"
+# ─── Copy rules (all .mdc) ────────────────────────────────────────────────
+if [ -d "$RULES_SRC" ]; then
+  mkdir -p "$TARGET_DIR/.cursor/rules"
+  if [ "$TARGET_DIR" != "$REPO_DIR" ]; then
+    cp "$RULES_SRC"/*.mdc "$TARGET_DIR/.cursor/rules/" 2>/dev/null || true
+  fi
+  RULE_COUNT="$(ls "$TARGET_DIR/.cursor/rules"/*.mdc 2>/dev/null | wc -l | tr -d ' ')"
+  ok "Project rules installed ($RULE_COUNT .mdc under .cursor/rules/)"
 fi
 
 # ─── Copy AGENTS.md ───────────────────────────────────────────────────────
@@ -187,12 +218,40 @@ if [ -f "$MCP_TOOLS_SRC" ] && [ "$TARGET_DIR" != "$REPO_DIR" ]; then
   ok "MCP_TOOLS.md installed"
 fi
 
-# ─── Copy project-context/current.md (if exists) ──────────────────────────
-if [ -f "$MEMORY_SRC/project-context/current.md" ] && [ "$TARGET_DIR" != "$REPO_DIR" ]; then
-  TARGET_PC="$TARGET_DIR/.cursor/qa-memory/project-context/current.md"
-  if [ ! -f "$TARGET_PC" ]; then
+# ─── Slash command /qa (beats plugin noise) ───────────────────────────────
+CMD_SRC="$COMMANDS_SRC/qa.md"
+GLOBAL_COMMANDS_DIR="${HOME}/.cursor/commands"
+mkdir -p "$GLOBAL_COMMANDS_DIR"
+if [ -f "$CMD_SRC" ]; then
+  mkdir -p "$TARGET_DIR/.cursor/commands"
+  if [ "$TARGET_DIR" != "$REPO_DIR" ]; then
+    cp "$CMD_SRC" "$TARGET_DIR/.cursor/commands/qa.md"
+    ok "Slash command installed (.cursor/commands/qa.md → /qa)"
+  fi
+  cp "$CMD_SRC" "$GLOBAL_COMMANDS_DIR/qa.md"
+  ok "Global slash command installed (~/.cursor/commands/qa.md → /qa)"
+fi
+
+# ─── Copy offline references ──────────────────────────────────────────────
+if [ -d "$REFS_SRC" ]; then
+  if [ "$TARGET_DIR" != "$REPO_DIR" ]; then
+    mkdir -p "$TARGET_DIR/.cursor/references"
+    cp -r "$REFS_SRC"/* "$TARGET_DIR/.cursor/references/"
+    ok "Offline references installed (.cursor/references/)"
+  else
+    info "Running in-place — references already present"
+  fi
+fi
+
+# ─── Copy project-context template ────────────────────────────────────────
+TARGET_PC="$TARGET_DIR/.cursor/qa-memory/project-context/current.md"
+if [ ! -f "$TARGET_PC" ]; then
+  if [ -f "$MEMORY_SRC/project-context/current.md" ]; then
     cp "$MEMORY_SRC/project-context/current.md" "$TARGET_PC"
     ok "project-context/current.md installed"
+  elif [ -f "$CONTEXT_TPL_SRC" ]; then
+    cp "$CONTEXT_TPL_SRC" "$TARGET_PC"
+    ok "project-context/current.md installed from template"
   fi
 fi
 
@@ -227,13 +286,40 @@ echo -e "${GREEN}${BOLD}━━━━━━━━━━━━━━━━━━�
 echo ""
 echo -e "${BOLD}Next steps:${NC}"
 echo ""
-echo "  1. Configure MCP servers → ~/.cursor/mcp.json"
-echo "     See $TARGET_DIR/.cursor/MCP_TOOLS.md for required servers"
+echo "  1. Reload Cursor window, then:"
+echo "       /qa onboard"
+echo "     Or terminal wizard:"
+echo "       node scripts/onboard-wizard.js"
 echo ""
-echo "  2. Restart Cursor"
+echo "  2. Optional step-by-step:"
+echo "       node scripts/setup-mcp.js --full"
+echo "       node scripts/setup-git.js"
+echo "       node scripts/setup-tooling.js"
+echo "       node scripts/setup-prefs.js"
+echo "       node scripts/install-mcp-hook.js"
+echo "       node scripts/mcp-mode.js auto"
 echo ""
-echo "  3. Select '@qa' from the agent dropdown"
-echo "     (top-left of chat panel) or type @qa in chat"
+echo "  3. node scripts/onboard-status.js"
+echo "  4. node scripts/doctor.js"
+echo ""
+echo "  Docs: docs/FIRST_RUN.md  docs/MCP.md  docs/DEMO.md"
+echo "  Public stub: onboard.example.md"
+echo ""
+
+if [ -t 0 ] && [ -z "${CI:-}" ]; then
+  read -r -p "Run setup-mcp + setup-git + setup-tooling now? (y/N) " RUN_NOW || true
+  if [[ "${RUN_NOW:-}" =~ ^[Yy]$ ]]; then
+    info "Starting setup-mcp.js ..."
+    node "$REPO_DIR/scripts/setup-mcp.js" || true
+    info "Starting setup-git.js ..."
+    node "$REPO_DIR/scripts/setup-git.js" || true
+    info "Starting setup-tooling.js ..."
+    node "$REPO_DIR/scripts/setup-tooling.js" || true
+    info "Starting doctor.js ..."
+    node "$REPO_DIR/scripts/doctor.js" || true
+  fi
+fi
+echo -e "${CYAN}Lifecycle: ./update.sh  |  ./uninstall.sh  |  CHANGELOG.md${NC}"
 echo ""
 echo -e "${CYAN}Memory:${NC}"
 echo -e "${CYAN}  Global (shared across projects): $GLOBAL_STORE_DIR${NC}"
