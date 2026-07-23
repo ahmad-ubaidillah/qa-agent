@@ -2,19 +2,21 @@
 
 QA Agent installs on the **host** (Windows / macOS / Linux).
 
-**Adaptive rule:** use **host `k6`** whenever it is on PATH. Use **WSL** only on Windows when host k6 is missing or blocked (corporate policy), or when pref `tooling.k6_runner=wsl`.
+**Adaptive rule** (`scripts/resolve-k6.js`):
 
-```bash
-node scripts/resolve-k6.js          # see which runner wins
-node scripts/resolve-k6.js --run -- run script.js
-```
+1. **Inside WSL** (Remote-WSL / Ubuntu shell) → use local `k6` (priority)
+2. Else **host** `k6` on PATH
+3. Else Windows → **WSL bridge** (`wsl -- k6`)
+4. Else install
+
+Optional pref: `tooling.k6_runner` = `auto` | `host` | `wsl`
 
 ## Split (when WSL is needed)
 
 | What | Where |
 |------|--------|
 | Cursor + QA Agent + MCP | Host OS |
-| `k6 run …` | Host if available, else **WSL** Ubuntu on Windows |
+| `k6 run …` | Inside WSL: local `k6`. Else host. Else Windows bridge |
 
 macOS / Linux teammates: install k6 on the host. No WSL required.
 

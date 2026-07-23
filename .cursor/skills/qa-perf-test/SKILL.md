@@ -16,9 +16,10 @@ node scripts/resolve-k6.js
 
 | Priority | When | How to run |
 |----------|------|------------|
-| 1. **Host** | `k6` on PATH (Windows / macOS / Linux) | `k6 run script.js` |
-| 2. **WSL** | Windows only, host k6 missing, WSL k6 present | `wsl -- bash -lc "cd '<perf-dir>' && k6 run script.js"` |
-| 3. **Install** | Neither | Host install first (`setup-tooling` / brew / option **2**). WSL option **6** only if host install blocked or user prefers |
+| 1. **Inside WSL** | Terminal / Remote-WSL (`WSL_DISTRO_NAME`, etc.) | `k6 run script.js` (native in distro, never nest `wsl --`) |
+| 2. **Host** | Not in WSL, `k6` on PATH | `k6 run script.js` |
+| 3. **WSL bridge** | Windows host, no host k6, WSL has k6 | `wsl -- bash -lc "cd '<perf-dir>' && k6 run script.js"` |
+| 4. **Install** | Neither | Host install first. WSL option **6** if host blocked |
 
 - Pref override (optional): `tooling.k6_runner` = `auto` (default) | `host` | `wsl`
 - Pref `paths.perf_tests` = perf repo root

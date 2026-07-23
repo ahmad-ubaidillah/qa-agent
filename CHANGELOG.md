@@ -4,6 +4,11 @@ All notable changes to QA Agent are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses [SemVer](https://semver.org/).
 
+## [1.5.6] - 2026-07-23
+
+### Changed
+- `resolve-k6`: if terminal is **inside WSL**, prioritize WSL/local `k6` (native, no nested `wsl --`)
+
 ## [1.5.5] - 2026-07-23
 
 ### Changed

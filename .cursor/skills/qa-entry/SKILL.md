@@ -31,7 +31,7 @@ Receptionist: detect intent, clarify if needed, route to **one** skill. Stay sho
 | "label groom" / TC-on-progress > TC-ready | `@qa-test-execution` |
 | "update case" / edit TestRail case text | `@qa-test-cases` |
 | "create test case" / story + cases | `@qa-test-cases` |
-| "perf" / k6 / load | `@qa-perf-test` (adaptive: `resolve-k6` host > WSL) |
+| "perf" / k6 / load | `@qa-perf-test` (adaptive: inside WSL > host > bridge) |
 | "visual" / screenshot compare | `@qa-visual-test` |
 | "scan project" / mapping | `@qa-project-mapping` |
 | "onboard" / "run onboard" / "onboarding" / first-time setup | See **Onboard** below |

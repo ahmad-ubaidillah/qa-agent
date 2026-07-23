@@ -46,7 +46,7 @@ Never invent. Cite memory / MCP / user / docs. Empty MCP → say so. Missing con
 | Search Shortcut | `@qa-search-tickets` |
 | Incident triage | `@qa-defect-triage` |
 | Cypress UI | `@qa-ui-automation` |
-| k6 perf | `@qa-perf-test` (adaptive: host `k6` first, WSL only if needed on Windows) |
+| k6 perf | `@qa-perf-test` (adaptive: inside WSL > host > WSL bridge) |
 | TestRail cases | `@qa-test-cases` |
 | Plans / mark results | `@qa-test-execution` |
 | Karate API | `@qa-api-test` |

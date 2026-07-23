@@ -14,7 +14,7 @@ Detect which runner to use:
 node scripts/resolve-k6.js
 ```
 
-Order: **host k6** → else **WSL k6** (Windows only) → else install host (or WSL if host blocked).
+Order: **inside WSL** → **host k6** → else **WSL bridge** (Windows) → else install.
 
 Optional pref: `tooling.k6_runner` = `auto` | `host` | `wsl`
 

@@ -1,12 +1,15 @@
 #!/usr/bin/env node
 /**
- * Adaptive k6 runner: host first, WSL fallback on Windows only.
+ * Adaptive k6 runner:
+ *   1. Inside WSL terminal → prioritize local k6 (native, no nested wsl --)
+ *   2. Else host PATH k6
+ *   3. Else Windows → WSL bridge (wsl -- k6)
  *
- *   node scripts/resolve-k6.js           # human status
- *   node scripts/resolve-k6.js --json    # machine-readable
- *   node scripts/resolve-k6.js --run -- script.js [k6 args...]
+ *   node scripts/resolve-k6.js
+ *   node scripts/resolve-k6.js --json
+ *   node scripts/resolve-k6.js --run -- run script.js
  *
- * Pref override (optional): tooling.k6_runner = auto|host|wsl
+ * Pref: tooling.k6_runner = auto|host|wsl
  */
 'use strict';
 
@@ -27,6 +30,22 @@ function readPref(key) {
   return (r.stdout || '').trim().replace(/^"|"$/g, '');
 }
 
+/** True when Node itself is running inside a WSL distro (not Windows host). */
+function isInsideWsl() {
+  // Windows-hosted Node is never "inside" WSL (even if WSLENV is set for interop)
+  if (process.platform === 'win32') return false;
+  if (process.env.WSL_DISTRO_NAME || process.env.WSL_INTEROP) return true;
+  if (process.platform === 'linux') {
+    try {
+      const ver = fs.readFileSync('/proc/version', 'utf8');
+      if (/microsoft|wsl/i.test(ver)) return true;
+    } catch {
+      /* ignore */
+    }
+  }
+  return false;
+}
+
 function hostK6Ok() {
   for (const args of [['version'], ['--version']]) {
     const r = spawnSync('k6', args, { encoding: 'utf8', shell: true, windowsHide: true });
@@ -41,7 +60,9 @@ function wslAvailable() {
   return r.status === 0 || /subsystem|version/i.test((r.stdout || '') + (r.stderr || ''));
 }
 
-function wslK6Ok() {
+/** k6 via Windows → WSL bridge (only when not already inside WSL). */
+function wslBridgeK6Ok() {
+  if (isInsideWsl() || process.platform !== 'win32') return false;
   if (!wslAvailable()) return false;
   const r = spawnSync('wsl', ['--', 'k6', 'version'], {
     encoding: 'utf8',
@@ -55,9 +76,11 @@ function wslK6Ok() {
 /**
  * @returns {{
  *   runner: 'host'|'wsl'|'missing',
+ *   invoke: 'native'|'wsl-bridge'|'',
  *   reason: string,
  *   host: boolean,
  *   wsl: boolean,
+ *   insideWsl: boolean,
  *   prefer: string,
  *   installHint: string,
  *   runExample: string
@@ -66,82 +89,112 @@ function wslK6Ok() {
 function resolveK6() {
   const preferRaw = (readPref('tooling.k6_runner') || 'auto').toLowerCase();
   const prefer = ['auto', 'host', 'wsl'].includes(preferRaw) ? preferRaw : 'auto';
+  const insideWsl = isInsideWsl();
   const host = hostK6Ok();
-  const wsl = wslK6Ok();
+  const bridge = wslBridgeK6Ok();
+  // "wsl available" for status: local k6 while inside WSL, else bridge
+  const wsl = insideWsl ? host : bridge;
 
   const installHost =
-    process.platform === 'win32'
+    process.platform === 'win32' && !insideWsl
       ? 'node scripts/setup-tooling.js  (pick k6 / option 2)'
       : process.platform === 'darwin'
         ? 'brew install k6  or  node scripts/setup-tooling.js'
-        : 'node scripts/setup-tooling.js  (or Grafana apt)';
+        : 'sudo apt install / Grafana apt, or from Windows: node scripts/setup-wsl-tooling.js --install --only k6';
   const installWsl = 'node scripts/setup-wsl-tooling.js --install --only k6  (onboard tooling 6)';
+
+  const base = { host, wsl, insideWsl, prefer };
 
   if (prefer === 'host') {
     if (host) {
       return {
+        ...base,
         runner: 'host',
+        invoke: 'native',
         reason: 'pref tooling.k6_runner=host',
-        host,
-        wsl,
-        prefer,
         installHint: '',
         runExample: 'k6 run script.js',
       };
     }
     return {
+      ...base,
       runner: 'missing',
+      invoke: '',
       reason: 'pref host but k6 not on PATH',
-      host,
-      wsl,
-      prefer,
       installHint: installHost,
       runExample: '',
     };
   }
 
   if (prefer === 'wsl') {
-    if (wsl) {
+    if (insideWsl && host) {
       return {
+        ...base,
         runner: 'wsl',
+        invoke: 'native',
+        reason: 'pref wsl + inside WSL terminal',
+        installHint: '',
+        runExample: 'k6 run script.js',
+      };
+    }
+    if (!insideWsl && bridge) {
+      return {
+        ...base,
+        runner: 'wsl',
+        invoke: 'wsl-bridge',
         reason: 'pref tooling.k6_runner=wsl',
-        host,
-        wsl,
-        prefer,
         installHint: '',
         runExample: "wsl -- bash -lc \"cd '<perf-dir>' && k6 run script.js\"",
       };
     }
     return {
+      ...base,
       runner: 'missing',
-      reason: 'pref wsl but k6 not in WSL',
-      host,
-      wsl,
-      prefer,
-      installHint: installWsl,
+      invoke: '',
+      reason: insideWsl ? 'pref wsl but k6 not on PATH in this distro' : 'pref wsl but k6 not in WSL',
+      installHint: insideWsl ? installHost : installWsl,
       runExample: '',
     };
   }
 
-  // auto
+  // auto: inside WSL terminal → prioritize WSL/local k6
+  if (insideWsl) {
+    if (host) {
+      return {
+        ...base,
+        runner: 'wsl',
+        invoke: 'native',
+        reason: 'inside WSL terminal',
+        installHint: '',
+        runExample: 'k6 run script.js',
+      };
+    }
+    return {
+      ...base,
+      runner: 'missing',
+      invoke: '',
+      reason: 'inside WSL but k6 not on PATH',
+      installHint: installHost,
+      runExample: '',
+    };
+  }
+
   if (host) {
     return {
+      ...base,
       runner: 'host',
+      invoke: 'native',
       reason: 'k6 on host PATH',
-      host,
-      wsl,
-      prefer,
       installHint: '',
       runExample: 'k6 run script.js',
     };
   }
-  if (wsl) {
+  if (bridge) {
     return {
+      ...base,
       runner: 'wsl',
+      invoke: 'wsl-bridge',
       reason: 'host k6 missing, WSL k6 available',
-      host,
-      wsl,
-      prefer,
       installHint: '',
       runExample: "wsl -- bash -lc \"cd '<perf-dir>' && k6 run script.js\"",
     };
@@ -150,11 +203,10 @@ function resolveK6() {
   const hints = [installHost];
   if (process.platform === 'win32') hints.push(`or fallback: ${installWsl}`);
   return {
+    ...base,
     runner: 'missing',
+    invoke: '',
     reason: 'no k6 on host' + (process.platform === 'win32' ? ' or WSL' : ''),
-    host,
-    wsl,
-    prefer,
     installHint: hints.join(' · '),
     runExample: '',
   };
@@ -170,15 +222,15 @@ function runWithResolved(k6Args) {
   let cmd;
   let args;
   let shell = false;
-  if (r.runner === 'host') {
+  if (r.invoke === 'wsl-bridge') {
+    cmd = 'wsl';
+    args = ['--', 'k6', ...(k6Args.length ? k6Args : ['version'])];
+  } else {
     cmd = 'k6';
     args = k6Args.length ? k6Args : ['version'];
     shell = true;
-  } else {
-    cmd = 'wsl';
-    args = ['--', 'k6', ...(k6Args.length ? k6Args : ['version'])];
   }
-  console.error(`Using k6 via ${r.runner} (${r.reason})`);
+  console.error(`Using k6 via ${r.runner}/${r.invoke || 'native'} (${r.reason})`);
   const child = spawnSync(cmd, args, { stdio: 'inherit', shell, windowsHide: true });
   process.exit(child.status == null ? 1 : child.status);
 }
@@ -191,7 +243,8 @@ function main() {
   node scripts/resolve-k6.js --json
   node scripts/resolve-k6.js --run [--] [k6 args...]
 
-Pref: tooling.k6_runner = auto (default) | host | wsl`);
+Auto order: inside WSL → host PATH → Windows WSL bridge
+Pref: tooling.k6_runner = auto | host | wsl`);
     return;
   }
   if (argv.includes('--run')) {
@@ -207,14 +260,21 @@ Pref: tooling.k6_runner = auto (default) | host | wsl`);
     return;
   }
   console.log('k6 runner (adaptive)');
-  console.log(`  prefer:  ${info.prefer}`);
-  console.log(`  host:    ${info.host ? 'yes' : 'no'}`);
-  console.log(`  wsl:     ${info.wsl ? 'yes' : 'no'}`);
-  console.log(`  pick:    ${info.runner}${info.reason ? ` (${info.reason})` : ''}`);
-  if (info.runExample) console.log(`  example: ${info.runExample}`);
-  if (info.installHint) console.log(`  install: ${info.installHint}`);
+  console.log(`  prefer:     ${info.prefer}`);
+  console.log(`  insideWsl:  ${info.insideWsl ? 'yes' : 'no'}`);
+  console.log(`  host:       ${info.host ? 'yes' : 'no'}`);
+  console.log(`  wsl:        ${info.wsl ? 'yes' : 'no'}`);
+  console.log(`  pick:       ${info.runner}${info.invoke ? '/' + info.invoke : ''}${info.reason ? ` (${info.reason})` : ''}`);
+  if (info.runExample) console.log(`  example:    ${info.runExample}`);
+  if (info.installHint) console.log(`  install:    ${info.installHint}`);
 }
 
-module.exports = { resolveK6, hostK6Ok, wslK6Ok };
+module.exports = {
+  resolveK6,
+  hostK6Ok,
+  wslK6Ok: wslBridgeK6Ok,
+  wslBridgeK6Ok,
+  isInsideWsl,
+};
 
 if (require.main === module) main();

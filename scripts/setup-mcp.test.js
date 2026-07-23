@@ -178,7 +178,13 @@ const { resolveK6 } = require('./resolve-k6');
 const rk = resolveK6();
 assert(['host', 'wsl', 'missing'].includes(rk.runner), 'resolveK6 runner enum');
 assert(typeof rk.host === 'boolean' && typeof rk.wsl === 'boolean', 'resolveK6 host/wsl flags');
+assert(typeof rk.insideWsl === 'boolean', 'resolveK6 insideWsl flag');
 assert(rk.prefer === 'auto' || rk.prefer === 'host' || rk.prefer === 'wsl', 'resolveK6 prefer');
+const { isInsideWsl } = require('./resolve-k6');
+assert(typeof isInsideWsl() === 'boolean', 'isInsideWsl returns boolean');
+if (rk.runner !== 'missing') {
+  assert(rk.invoke === 'native' || rk.invoke === 'wsl-bridge', 'resolveK6 invoke when found');
+}
 
 fs.rmSync(tmp, { recursive: true, force: true });
 
