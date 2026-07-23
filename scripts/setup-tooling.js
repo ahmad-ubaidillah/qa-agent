@@ -10,7 +10,9 @@
  *   node scripts/setup-tooling.js --wsl --install    # install k6 into WSL
  *
  * Checks: k6, java, mvn (Maven). Optional winget/brew install.
- * On Windows, prefer k6 in WSL for perf runs: scripts/setup-wsl-tooling.js
+ * On Windows, k6 is adaptive: host PATH first, WSL fallback via setup-wsl-tooling.js
+ * See scripts/resolve-k6.js
+
  * Karate MCP needs a `karate` CLI binary. Most Maven API repos use
  * (`mvn test`) instead — that path does NOT need karate MCP.
  */
@@ -112,11 +114,11 @@ async function main() {
     console.log(`Usage: node scripts/setup-tooling.js [--install] [--non-interactive] [--only k6,java,mvn] [--wsl]
 
   Detects k6, Java, Maven on this host. Optionally installs via winget (Windows) or brew (macOS).
-  --wsl  delegate to setup-wsl-tooling.js (k6 inside WSL for perf runs on Windows).
+  --wsl  delegate to setup-wsl-tooling.js (optional WSL k6 fallback on Windows).
   --only limits which tools to check/install (comma list).
 
 Notes:
-  - Perf skills: prefer k6 in WSL on Windows (setup-wsl-tooling.js). Host k6 optional.
+  - Perf skills: adaptive host > WSL (scripts/resolve-k6.js). Host k6 preferred when allowed.
   - API skills usually use Maven in paths.api_tests (not karate MCP).
   - Optional karate MCP needs a standalone karate CLI. Skip if you only use mvn.`);
     return;

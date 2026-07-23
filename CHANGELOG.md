@@ -4,6 +4,16 @@ All notable changes to QA Agent are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses [SemVer](https://semver.org/).
 
+## [1.5.5] - 2026-07-23
+
+### Changed
+- k6 runner is **adaptive**: host PATH first, WSL only as Windows fallback (`scripts/resolve-k6.js`)
+- Onboard tooling **2** preferred when host install allowed. **6** = WSL fallback (no longer auto-added by "5=all host")
+- Docs / `@qa-perf-test` / doctor / DEMO aligned to adaptive policy
+
+### Added
+- Pref `tooling.k6_runner` = `auto` | `host` | `wsl`
+
 ## [1.5.4] - 2026-07-23
 
 ### Added

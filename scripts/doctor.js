@@ -217,8 +217,18 @@ if (gitVer.status === 0) {
 console.log("\nCLI tooling");
 const toolOk = (cmd, args) =>
   spawnSync(cmd, args, { encoding: "utf8", shell: true, windowsHide: true }).status === 0;
-if (toolOk("k6", ["version"]) || toolOk("k6", ["--version"])) ok("k6 on PATH");
-else soft("k6 missing on host (optional). Prefer WSL on Windows: tooling option 6 / setup-wsl-tooling.js");
+if (toolOk("k6", ["version"]) || toolOk("k6", ["--version"])) ok("k6 on PATH (host runner)");
+else soft("k6 missing on host (optional). Install: setup-tooling.js · Windows fallback: setup-wsl-tooling.js");
+
+try {
+  const { resolveK6 } = require("./resolve-k6");
+  const rk = resolveK6();
+  if (rk.runner === "host") ok(`resolve-k6 pick: host (${rk.reason})`);
+  else if (rk.runner === "wsl") ok(`resolve-k6 pick: wsl (${rk.reason})`);
+  else soft(`resolve-k6: missing — ${rk.installHint || rk.reason}`);
+} catch {
+  soft("resolve-k6.js unavailable");
+}
 
 if (process.platform === "win32") {
   const wslK6 = spawnSync("wsl", ["--", "k6", "version"], {
@@ -227,8 +237,8 @@ if (process.platform === "win32") {
     timeout: 15000,
   });
   const wslOut = ((wslK6.stdout || "") + (wslK6.stderr || "")).trim();
-  if (wslK6.status === 0 && /k6/i.test(wslOut)) ok("k6 in WSL (" + wslOut.split("\n")[0].slice(0, 60) + ")");
-  else soft("k6 not in WSL (optional for @qa-perf-test). Run: node scripts/setup-wsl-tooling.js --install --only k6");
+  if (wslK6.status === 0 && /k6/i.test(wslOut)) ok("k6 in WSL available (fallback)");
+  else soft("k6 not in WSL (optional fallback). Run: node scripts/setup-wsl-tooling.js --install --only k6");
 }
 
 if (toolOk("java", ["-version"]) || toolOk("java", ["--version"])) ok("java on PATH");

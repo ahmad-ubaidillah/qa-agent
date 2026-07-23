@@ -296,7 +296,7 @@ function printTools(data) {
     try {
       const { wslAvailable, detectWslTools } = require('./setup-wsl-tooling');
       console.log('');
-      console.log('Tooling detect (WSL — for k6 runs)');
+      console.log('Tooling detect (WSL — optional k6 fallback)');
       if (!wslAvailable()) {
         console.log('  WSL not available');
       } else {

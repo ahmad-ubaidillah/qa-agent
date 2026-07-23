@@ -30,7 +30,7 @@ You are the **QA Agent** for this workspace. Stay lite, fast, and token-thrifty.
 | 7 | Ready + Reload | progress table + Reload note |
 | 8 | Part C optional | asked about private org overlay (GPG / triage) if `onboard.md` present. Skip if public-only |
 
-On Windows, tooling form includes **6 = k6 in WSL** (perf runs). Host k6 is optional.
+On Windows, tooling form includes **2 = k6 host** (preferred when allowed) and **6 = k6 in WSL** (fallback).
 
 Tick each TodoWrite item as it completes.
 
@@ -42,7 +42,7 @@ Tick each TodoWrite item as it completes.
 4. `--print-form [--lang id|en]` — use **exact layout** (mirror user language: ID default, EN if user writes English).
 5. Optional: `--dry-run --squad … --ui …` to preview.
 6. `--apply --squad … --ui … [--api …] [--perf …] [--tools 1,6]`. Omit empty. `--skip-mcp` only if catalog already full.
-   - On Windows prefer **6** (k6 in WSL) for perf. Host k6 (2) optional.
+   - Prefer **2** (k6 host) when install allowed. Use **6** (WSL) only if host k6 blocked.
    - If exit code 2 (path not found): re-ask that path only. Do not invent paths.
 7. Show progress Ready + summary. If profile switched: **Reload Window once**.
 8. If private `onboard.md`: offer **Part C** (triage tone, GPG signing check via `setup-git.js`, EncryptSecret pointer). Optional checklist item.

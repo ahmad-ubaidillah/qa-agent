@@ -1,23 +1,35 @@
 # k6 Performance Testing Quick Reference
 
-## Installation
+## Installation (adaptive)
 
 | Platform | Install |
 |----------|---------|
-| **Windows (corporate / CSG pattern)** | **WSL only**: `node scripts/setup-wsl-tooling.js --install --only k6` (onboard option **6**). Do not rely on winget host k6. |
-| macOS | `brew install k6` |
-| Linux / WSL Ubuntu | Grafana apt repo — see `docs/WSL.md` / setup-wsl-tooling |
+| **Any OS with host k6 allowed** | Host first: `node scripts/setup-tooling.js` (option **2**) · macOS `brew install k6` · Linux Grafana apt |
+| **Windows when host k6 blocked** | Fallback WSL: `node scripts/setup-wsl-tooling.js --install --only k6` (onboard option **6**) |
 | Docker | `docker run --rm -i grafana/k6 run - <script.js` |
+
+Detect which runner to use:
+
+```bash
+node scripts/resolve-k6.js
+```
+
+Order: **host k6** → else **WSL k6** (Windows only) → else install host (or WSL if host blocked).
+
+Optional pref: `tooling.k6_runner` = `auto` | `host` | `wsl`
 
 ## How to run
 
 ```bash
-# Windows → WSL (preferred)
-wsl -- bash -lc "cd '/path/in/wsl/to/perf-repo' && k6 run script.js"
+# Adaptive (recommended)
+node scripts/resolve-k6.js --run -- run script.js
 
-# macOS / Linux host
+# Host (when k6 on PATH)
 k6 run script.js
 k6 run --out json=results.json script.js
+
+# WSL fallback (Windows, only if host missing)
+wsl -- bash -lc "cd '/path/in/wsl/to/perf-repo' && k6 run script.js"
 ```
 
 Pref: `paths.perf_tests`. Secrets: team vault / EncryptSecret — never commit plaintext.

@@ -134,7 +134,9 @@ function detectTools() {
     list.push({
       id: 6,
       key: 'k6-wsl',
-      label: wslOk ? 'k6 in WSL (recommended for perf)' : 'k6 in WSL (install WSL first)',
+      label: wslOk
+        ? 'k6 in WSL (fallback if host k6 blocked)'
+        : 'k6 in WSL (install WSL first, optional fallback)',
       ok: wslK6,
       needsWsl: true,
     });
@@ -147,9 +149,8 @@ function installSelectedTools(ids) {
   const missing = tools.filter((t) => !t.ok);
   let wantIds = ids.slice();
   if (wantIds.includes(5)) {
+    // 5 = all *host* tools only — do not auto-add WSL k6
     wantIds = missing.filter((t) => t.id !== 6).map((t) => t.id);
-    // on Windows, 5 also implies WSL k6 if missing
-    if (process.platform === 'win32' && missing.some((t) => t.id === 6)) wantIds.push(6);
   }
   const want = new Set(wantIds);
   const onlyKeys = [];
@@ -222,7 +223,7 @@ async function toolingPicker(rl, toolsArg) {
     console.log('Install missing? Enter numbers separated by comma.');
     console.log('  1=Git  2=k6 host  3=Java  4=Maven  5=ALL host missing');
     if (process.platform === 'win32') {
-      console.log('  6=k6 in WSL (recommended for perf runs)');
+      console.log('  6=k6 in WSL (fallback if host k6 blocked)');
     }
     console.log('  Example: 1,6   or   5');
     console.log('  Enter = skip');
@@ -316,13 +317,13 @@ function formText(lang) {
 
 3. Install tooling that is missing?
    1 = Git (host)
-   2 = k6 host (optional)
+   2 = k6 host (preferred when install allowed)
    3 = Java
    4 = Maven
    5 = all host missing
-   6 = k6 in WSL (recommended for perf on Windows)
+   6 = k6 in WSL (Windows fallback if host blocked)
 
-   Answer: 1,6   or  5   or  skip`;
+   Answer: 1,2   or  1,6   or  5   or  skip`;
   }
   return `Onboard — isi data di bawah (salin, edit, kirim balik)
 
@@ -338,13 +339,13 @@ function formText(lang) {
 
 3. Install tooling yang belum terpasang?
    1 = Git (host)
-   2 = k6 host (optional)
+   2 = k6 host (prioritas jika boleh diinstall)
    3 = Java
    4 = Maven
    5 = semua host yang missing
-   6 = k6 di WSL (disarankan untuk perf di Windows)
+   6 = k6 di WSL (fallback Windows jika host diblok)
 
-   Jawab: 1,6   atau  5   atau  skip`;
+   Jawab: 1,2   atau  1,6   atau  5   atau  skip`;
 }
 
 function parseCli(argv) {

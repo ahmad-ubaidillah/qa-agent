@@ -1,20 +1,29 @@
 ---
 name: qa-perf-test
-description: Generate k6 performance tests from Shortcut stories or API specs. Interactive flow: ask for scenario type, VUs, duration, thresholds, generates k6 script, auto-runs (WSL on Windows), auto-heals. Use when user asks for "perf test", "generate k6", "load test", "performance test", or provides a story ID for performance testing.
+description: Generate k6 performance tests from Shortcut stories or API specs. Interactive flow: ask for scenario type, VUs, duration, thresholds, generates k6 script, auto-runs (adaptive host/WSL), auto-heals. Use when user asks for "perf test", "generate k6", "load test", "performance test", or provides a story ID for performance testing.
 ---
 
 # QA Performance Test (k6)
 
-## Run environment (mandatory)
+## Run environment (adaptive — mandatory)
 
-| Host OS | How to run k6 |
-|---------|----------------|
-| **Windows** | Prefer **WSL**: `wsl -- bash -lc "cd '<perf-dir>' && k6 run script.js"` |
-| macOS / Linux | `k6 run script.js` on host |
+**Detect first** (do not assume WSL):
 
-- Pref `paths.perf_tests` = perf repo root (path reachable from WSL, e.g. `/home/...` or `/mnt/c/...`).
-- If WSL k6 missing: `node scripts/setup-wsl-tooling.js --install --only k6` (or onboard tooling **6**).
-- Do **not** assume host `k6` on corporate Windows.
+```bash
+node scripts/resolve-k6.js
+# or: node scripts/resolve-k6.js --json
+```
+
+| Priority | When | How to run |
+|----------|------|------------|
+| 1. **Host** | `k6` on PATH (Windows / macOS / Linux) | `k6 run script.js` |
+| 2. **WSL** | Windows only, host k6 missing, WSL k6 present | `wsl -- bash -lc "cd '<perf-dir>' && k6 run script.js"` |
+| 3. **Install** | Neither | Host install first (`setup-tooling` / brew / option **2**). WSL option **6** only if host install blocked or user prefers |
+
+- Pref override (optional): `tooling.k6_runner` = `auto` (default) | `host` | `wsl`
+- Pref `paths.perf_tests` = perf repo root
+- macOS / Linux: never require WSL
+- Corporate Windows where host k6 is blocked → use WSL fallback (see `docs/WSL.md`)
 
 ### Secrets / vault (before inventing credentials)
 
@@ -40,6 +49,7 @@ Ask the user:
 - `project-context/current.md` — base URL, auth, helpers
 - `cor list perf-test` (good / bad)
 - Existing k6 helpers in `paths.perf_tests` (getToken, getGlobal, defineSummary, thresholds)
+- `node scripts/resolve-k6.js` — remember runner for Step 8
 
 ### Step 3: Research (if needed)
 - `.cursor/references/k6-testing.md`
@@ -65,22 +75,19 @@ APPROVE / EDIT / REJECT → `cor add` on reject.
 ### Step 8: Auto-Run (Optional)
 Ask: "Run now?"
 
-**Windows (WSL):**
-```bash
-wsl -- bash -lc "cd '$(wslpath -a paths.perf_tests or unix path)' && k6 run path/to/test.js"
-```
-Or if cwd already inside WSL-mounted repo:
-```bash
-wsl -- bash -lc "cd '/mnt/c/...' && k6 run path/to/test.js"
-```
+Use **resolved** runner from Step 2:
 
-**macOS / Linux:**
 ```bash
+# Host (default when available)
 k6 run path/to/test.js
 k6 run --out json=results.json path/to/test.js
-```
 
-Verify first: `wsl -- k6 version` (Windows) or `k6 version`.
+# Or delegate:
+node scripts/resolve-k6.js --run -- run path/to/test.js
+
+# WSL only when resolve-k6 picks wsl
+wsl -- bash -lc "cd '<perf-dir-unix>' && k6 run path/to/test.js"
+```
 
 ### Step 9: Auto-Healing
 Fix and re-run max 2x. Then ask user.
@@ -97,6 +104,7 @@ Fix and re-run max 2x. Then ask user.
 
 ## References
 - `.cursor/references/k6-testing.md`
-- `docs/WSL.md`
+- `scripts/resolve-k6.js`
+- `docs/WSL.md` (Windows fallback only)
 - `scripts/setup-wsl-tooling.js`
 - Private `onboard.md` Part A9 (EncryptSecret) when present
