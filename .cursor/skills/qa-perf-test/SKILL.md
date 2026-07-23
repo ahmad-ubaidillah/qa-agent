@@ -35,6 +35,15 @@ node scripts/resolve-k6.js
 
 ## Interactive Flow
 
+### Step 0: Memory gate (mandatory)
+
+Load `.cursor/rules/automation-memory-gate.mdc`.
+
+1. Resolve `paths.perf_tests`. If unset → ask for perf repo path. Do not invent.
+2. Read `.cursor/qa-memory/project-context/current.md`.
+3. If missing, empty, >7d, or mapped root ≠ `paths.perf_tests` → **`@qa-project-mapping`** on that path → save → `proj sync`.
+4. If fresh → reuse memory. Then continue.
+
 ### Step 1: Gather Context
 Ask the user:
 1. **Source**: Shortcut story ID, API endpoint, or flow
@@ -47,7 +56,7 @@ Ask the user:
 5. **Environment**: staging / production / custom base URL
 
 ### Step 2: Check Memory & Existing
-- `project-context/current.md` — base URL, auth, helpers
+- `project-context/current.md` — base URL, auth, helpers (from gate)
 - `cor list perf-test` (good / bad)
 - Existing k6 helpers in `paths.perf_tests` (getToken, getGlobal, defineSummary, thresholds)
 - `node scripts/resolve-k6.js` — remember runner for Step 8

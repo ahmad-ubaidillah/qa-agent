@@ -4,6 +4,14 @@ All notable changes to QA Agent are documented here.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/), and this project uses [SemVer](https://semver.org/).
 
+## [1.5.7] - 2026-07-23
+
+### Added
+- `automation-memory-gate.mdc`: before UI/API/perf/visual codegen when `paths.*` set, check `project-context` > map if missing/stale (>7d or path mismatch) > then generate
+
+### Changed
+- `@qa-ui-automation` / `@qa-api-test` / `@qa-perf-test` / `@qa-visual-test` / `@qa-project-mapping` / entry / AGENTS aligned to the gate
+
 ## [1.5.6] - 2026-07-23
 
 ### Changed

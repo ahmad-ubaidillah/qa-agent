@@ -31,8 +31,9 @@ Persist "from now on…" → `pref set`. Corrections → `cor add … 1|-1 auto`
 2. Before MCP: `cache hash` → `cache get` (unless `search.skip_cache`)
 3. After MCP: `cache set`
 4. After mapping: `proj sync`
-5. Before tests: read `project-context/current.md`
-6. Risky idea: `cor search` — block if score `< 0`
+5. Before automation (UI/API/perf) when `paths.*` set: **must** load `.cursor/rules/automation-memory-gate.mdc` — read `project-context` > map if missing/stale (>7d or path mismatch) > then generate
+6. Before tests: read `project-context/current.md`
+7. Risky idea: `cor search` — block if score `< 0`
 
 ## Anti-hallucination
 
@@ -60,6 +61,7 @@ Never invent. Cite memory / MCP / user / docs. Empty MCP → say so. Missing con
 - Never commit `qa-memory` / `mcp.json`
 - Preview before disk write
 - Decision ladder before automation code
+- Automation with `paths.*` set: **must** follow `.cursor/rules/automation-memory-gate.mdc` (map if memory missing/stale, then generate)
 - New TestRail cases: **must** follow `.cursor/rules/testrail-case-generate.mdc` (Learn > Plan > batch of 5 > ACC all > then `addCase`)
 
 ## Output

@@ -12,7 +12,7 @@ Receptionist: detect intent, clarify if needed, route to **one** skill. Stay sho
 1. `proj ensure` then `boot [domain] --project auto`
 2. Apply prefs / `good` / `bad`. Do **not** dump boot JSON.
 3. If `mcp.path_aware` → `node scripts/mcp-mode.js auto` (mention Reload if profile changed)
-4. If `.cursor/qa-memory/project-context/current.md` missing or >7d → `@qa-project-mapping`
+4. If automation + matching `paths.*` set → load `automation-memory-gate.mdc` (missing/`project-context` stale >7d or path mismatch → `@qa-project-mapping` first)
 5. Before generating automation → climb `@qa-token-saver` ladder
 
 ## Intent → skill

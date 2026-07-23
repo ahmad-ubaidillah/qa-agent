@@ -1,9 +1,21 @@
 ---
 name: qa-project-mapping
-description: Scan, map, and maintain project structure for QA context. Like Aider's repo map but specifically for test infrastructure, page objects, step definitions, and config. Called automatically before other automation skills. Use when entering a new project or when project structure changes.
+description: Scan, map, and maintain project structure for QA context. Like Aider's repo map but for test infra. Mandatory before UI/API/perf automation when paths.* set and project-context missing/stale. Use when entering a new project, path prefs change, or user asks refresh map.
 ---
 
 # QA Project Mapping
+
+## When (automation memory gate)
+
+Called **before** `@qa-ui-automation` / `@qa-api-test` / `@qa-perf-test` / `@qa-visual-test` when the matching `paths.*` is set and `project-context` is missing or stale. See `.cursor/rules/automation-memory-gate.mdc`.
+
+| Caller | Map this root |
+|--------|----------------|
+| UI / visual | `paths.ui_tests` |
+| API | `paths.api_tests` |
+| Perf | `paths.perf_tests` |
+
+Multi-path `a|b`: map each segment you will use (or all for that pref). Do not map unset paths.
 
 ## Why This Matters
 Aider proved that LLMs work significantly better when they have a **compact map** of the codebase. With a project map, the AI knows:
@@ -13,6 +25,9 @@ Aider proved that LLMs work significantly better when they have a **compact map*
 - Without reading all files (saves tokens)
 
 ## Flow
+
+### Step 0: Resolve target root
+From prefs (`paths.ui_tests` / `paths.api_tests` / `paths.perf_tests`) or user-supplied path. Confirm path exists on disk. Record the absolute root(s) in the map header.
 
 ### Step 1: Scan Project Structure
 Use glob/list files for mapping:
@@ -87,12 +102,13 @@ project/
 
 ### Step 7: Save to Memory
 - Save map to `.cursor/qa-memory/project-context/current.md`
-- Include: timestamp, file count, test count, framework version
+- Header must include: **Last updated** (ISO date), **Mapped roots** (absolute `paths.*` values), file/test counts, framework
 - Also save graph: `.cursor/qa-memory/project-context/graph.md`
+- Then: `node ~/.qa-agent/lib/store.js proj sync` (or `proj sync`)
 
 ### Step 8: Refresh Strategy
-- **First time** → full scan → save
-- **Subsequent** → check config file modification time → if changed, refresh
+- **First time** (or path pref new/changed) → full scan → save
+- **Subsequent** → reuse if <7d and roots still match prefs. If config mtime changed or user says refresh → re-scan
 - **Manual** → user calls `@qa refresh map`
 - Cache valid for 7 days (if no changes detected)
 

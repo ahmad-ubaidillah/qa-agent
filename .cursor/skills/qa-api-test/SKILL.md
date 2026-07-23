@@ -21,12 +21,20 @@ Ask the user:
 4. **Environment**: "Base URL environment? (e.g. staging, production)"
 5. **Auth**: "Is there authentication? (Bearer token, Basic auth, API key, or none)"
 
-### Step 2: Understand API
-- Read the story/AC to understand the business logic
-- Check `.cursor/qa-memory/project-context/current.md` for base URL and auth patterns
-- Check decision memory: `node ~/.qa-agent/lib/store.js cor list "api-test" "1"` - apply proven patterns (score >= 1)
-- Avoid past mistakes: `node ~/.qa-agent/lib/store.js cor list "api-test" "-999" "-1"` - score <= -1
-- If OpenAPI spec is available → read to get request/response schema
+### Step 2: Memory gate (mandatory) then Understand API
+
+Load `.cursor/rules/automation-memory-gate.mdc`.
+
+1. Resolve `paths.api_tests`. If unset → ask for API test repo path. Do not invent.
+2. Read `.cursor/qa-memory/project-context/current.md`.
+3. If missing, empty, >7d, or mapped root ≠ `paths.api_tests` → **`@qa-project-mapping`** on that path → save → `proj sync`.
+4. If fresh → reuse memory.
+5. Then:
+   - Read the story/AC to understand the business logic
+   - Use memory for base URL and auth patterns
+   - Check decision memory: `node ~/.qa-agent/lib/store.js cor list "api-test" "1"` - apply proven patterns (score >= 1)
+   - Avoid past mistakes: `node ~/.qa-agent/lib/store.js cor list "api-test" "-999" "-1"` - score <= -1
+   - If OpenAPI spec is available → read to get request/response schema
 
 ### Step 3: Research (if needed)
 - Context7: `resolve-library-id("karate", "Karate")` + `query-docs` for latest syntax

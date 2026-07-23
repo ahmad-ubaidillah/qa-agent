@@ -1,0 +1,44 @@
+---
+description: Mandatory memory gate before UI/API/perf automation when paths.* are set. Load with @qa-ui-automation @qa-api-test @qa-perf-test @qa-visual-test.
+alwaysApply: false
+---
+
+# Automation memory gate
+
+**Before generating any automation** (UI Cypress, API Karate, k6 perf, visual against product UI), run this gate. Do **not** skip to codegen.
+
+## Path binding
+
+| Skill | Pref path (required for this gate) |
+|-------|--------------------------------------|
+| `@qa-ui-automation` | `paths.ui_tests` |
+| `@qa-visual-test` (app under test) | `paths.ui_tests` |
+| `@qa-api-test` | `paths.api_tests` |
+| `@qa-perf-test` | `paths.perf_tests` |
+
+- Read pref via boot / `pref get … --project auto`.
+- Multi-path `a|b`: map the path(s) you will write into (or all listed for that skill).
+- Pref **empty** → ask for path (or onboard). Do **not** invent a repo. Gate does not block non-path work (e.g. pure TestRail case text).
+
+## Gate steps (mandatory when path is set)
+
+1. **Boot** domain if not done: `proj ensure` → `boot [ui|api|perf] --project auto`.
+2. **Check memory**: `.cursor/qa-memory/project-context/current.md` (and `graph.md` if present).
+3. **Stale / missing** if any of:
+   - file missing or empty
+   - no `Last updated` / older than **7 days**
+   - mapped root does **not** include the active `paths.*` entry
+4. If stale/missing → **`@qa-project-mapping`** on that path root → save knowledge to `project-context/` → `proj sync`. Cite that mapping ran.
+5. If fresh → **reuse memory** (conventions, helpers, base URL patterns). Do not full re-scan unless user says refresh / map again.
+6. **Then** generate / explore / run tests.
+
+## After generate
+
+- Update `project-context` / `generated-tests/` when new patterns appear.
+- APPROVE / EDIT / REJECT → `cor add` as usual.
+
+## Anti-patterns
+
+- Generating Cypress/Karate/k6 into a path-pref repo without reading or creating `project-context`
+- Re-mapping every turn when memory is fresh
+- Mapping a path that was never set in prefs

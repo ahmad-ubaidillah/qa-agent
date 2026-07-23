@@ -27,6 +27,10 @@ Ask the user:
    - Subsequent → compare against baselines
 5. **Dynamic content?** Ask if pages have date pickers, ads, or dynamic elements → use masks in config
 
+### Step 1b: Memory gate (when `paths.ui_tests` set)
+
+Load `.cursor/rules/automation-memory-gate.mdc`. If `paths.ui_tests` is set: check `project-context` > map if missing/stale > then continue. If path unset, optional (visual can target any URL).
+
 ### Step 2: Setup (first time)
 ```bash
 cd .cursor/skills/qa-visual-test/scripts

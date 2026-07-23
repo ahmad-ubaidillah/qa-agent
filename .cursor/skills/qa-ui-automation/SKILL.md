@@ -13,9 +13,14 @@ Ask the user:
 2. **Environment**: "Which environment? (staging, production, or a named env from project memory)"
 3. **User**: "Which test user? (check `project-context/current.md` for defaults, or provide custom credentials)"
 
-### Step 2: Learn Project
-Read `.cursor/qa-memory/project-context/current.md`.
-If empty → call `@qa-project-mapping` → save to memory.
+### Step 2: Learn Project (memory gate — mandatory)
+
+Load `.cursor/rules/automation-memory-gate.mdc`.
+
+1. Resolve `paths.ui_tests` (pref). If unset → ask for UI test repo path. Do not invent.
+2. Read `.cursor/qa-memory/project-context/current.md`.
+3. If missing, empty, >7d, or mapped root ≠ `paths.ui_tests` → **`@qa-project-mapping`** on that path → save → `proj sync`.
+4. If fresh → reuse memory only. Then continue.
 
 ### Step 3: Check Existing
 - If present, read `.cursor/testrail-coverage.json` or project coverage tracker from memory
